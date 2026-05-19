@@ -1,0 +1,24 @@
+# Ignore node dependencies
+node_modules/
+
+# Ignore local Android build cache and outputs (Very Huge!)
+android/app/build/
+android/.gradle/
+android/build/
+
+# Ignore local iOS build cache
+ios/build/
+
+# Ignore Expo and development caches
+.expo/
+dist/
+web-build/
+
+# Ignore environment config files that EAS doesn't need to upload (we configure env in eas.json)
+.env*.local
+
+# Ignore logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
