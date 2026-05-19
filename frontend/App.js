@@ -31,6 +31,8 @@ import NotificationsScreen from './app/screens/NotificationsScreen';
 import useAuthStore from './app/state/useAuthStore';
 import useExpenseStore from './app/state/useExpenseStore';
 import useFriendsStore from './app/state/useFriendsStore';
+import useVersionCheck from './app/utils/useVersionCheck';
+import VersionUpdateModal from './app/components/VersionUpdateModal';
 
 // Suppress harmless warnings
 LogBox.ignoreLogs(['Reanimated', 'fontFamily', 'InteractionManager']);
@@ -81,6 +83,18 @@ export default function App() {
   const expenses = useExpenseStore((s) => s.expenses);
 
   const [fontsLoaded, setFontsLoaded] = React.useState(false);
+  const [updateModalVisible, setUpdateModalVisible] = React.useState(false);
+  const [updateMessage, setUpdateMessage] = React.useState('');
+  const [updatePlatform, setUpdatePlatform] = React.useState('android');
+  const [updateApkLink, setUpdateApkLink] = React.useState('');
+
+  // Trigger app version check
+  useVersionCheck((message, platform, apkUrl) => {
+    setUpdateMessage(message);
+    setUpdatePlatform(platform);
+    setUpdateApkLink(apkUrl || '');
+    setUpdateModalVisible(true);
+  });
 
   useEffect(() => {
     async function loadFonts() {
@@ -219,6 +233,13 @@ export default function App() {
           <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
           {isAuthenticated ? <MainTabs /> : <LoginScreen />}
         </NavigationContainer>
+        <VersionUpdateModal 
+          visible={updateModalVisible} 
+          message={updateMessage} 
+          platform={updatePlatform} 
+          apkLink={updateApkLink}
+          onCancel={() => setUpdateModalVisible(false)} 
+        />
       </ToastProvider>
     </SafeAreaProvider>
   );

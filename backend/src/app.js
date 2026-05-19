@@ -20,6 +20,7 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const dayRoutes = require('./routes/dayRoutes');
 const userRoutes = require('./routes/userRoutes');
 const testRoutes = require('./routes/testRoutes');
+const versionRoutes = require('./routes/versionRoutes');
 
 const app = express();
 
@@ -54,15 +55,18 @@ app.use((req, res, next) => {
 const fs = require('fs');
 const localResetPath = path.join(__dirname, '../spendreset');
 const externalResetPath = path.join(__dirname, '../../spendreset');
-const resetPath = fs.existsSync(path.join(localResetPath, 'index.html')) ? localResetPath : externalResetPath;
+const resetPath = fs.existsSync(path.join(localResetPath, 'reset.html')) ? localResetPath : externalResetPath;
 
-// Serve index.html explicitly for the clean /spendreset route (without index.html in the URL)
+// Serve reset.html explicitly for the clean /spendreset route (without reset.html in the URL)
 app.get('/spendreset', (req, res) => {
-  res.sendFile(path.join(resetPath, 'index.html'));
+  res.sendFile(path.join(resetPath, 'reset.html'));
 });
 
 // Serve static files from the resolved spendreset directory
 app.use('/spendreset', express.static(resetPath));
+
+// Serve general static files from the public folder (index.html, assets, etc.)
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -80,7 +84,11 @@ app.use('/api/friends', friendRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/days', dayRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/test', testRoutes);
+// Only enable seed/test endpoints in development environments
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/test', testRoutes);
+}
+app.use('/api/version', versionRoutes);
 
 // Welcome route
 app.get('/api', (req, res) => {

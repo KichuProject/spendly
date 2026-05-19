@@ -74,6 +74,11 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+
     // Metadata
     lastLogin: {
       type: Date,

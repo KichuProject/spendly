@@ -13,7 +13,7 @@ const logger = require('../utils/logger');
 
 const TEST_USERS = [
   {
-    name: 'John Doe',
+    name: 'Alex',
     email: 'testuser1@gmail.com',
     phone: '9876543210',
     currency: 'USD',
@@ -21,7 +21,7 @@ const TEST_USERS = [
     password: 'Test@123456',
   },
   {
-    name: 'Jane Smith',
+    name: 'Sarah',
     email: 'testuser2@gmail.com',
     phone: '9876543211',
     currency: 'INR',

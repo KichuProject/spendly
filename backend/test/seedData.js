@@ -5,27 +5,27 @@
  */
 
 const mongoose = require('mongoose');
-const { encryptPassword } = require('./src/utils/hashUtils');
-require('dotenv').config();
+const { encryptPassword } = require('../src/utils/hashUtils');
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 
 // Import models
-const User = require('./src/models/User');
-const Expense = require('./src/models/Expense');
-const Friend = require('./src/models/Friend');
+const User = require('../src/models/User');
+const Expense = require('../src/models/Expense');
+const Friend = require('../src/models/Friend');
 
-const logger = require('./src/utils/logger');
+const logger = require('../src/utils/logger');
 
 // Test data
 const TEST_USERS = [
   {
-    name: 'John Doe',
+    name: 'Alex',
     email: 'testuser1@gmail.com',
     phone: '9876543210',
     currency: 'USD',
     expoPushToken: 'ExponentPushToken[test_token_1]',
   },
   {
-    name: 'Jane Smith',
+    name: 'Sarah',
     email: 'testuser2@gmail.com',
     phone: '9876543211',
     currency: 'INR',
@@ -48,6 +48,12 @@ const TEST_USERS = [
 ];
 
 const seedDatabase = async () => {
+  // Prevent seeding in production to protect real user data
+  if (process.env.NODE_ENV === 'production') {
+    logger.error('❌ DATABASE SEEDING BLOCKED: Cannot run seeding script in a production environment.');
+    process.exit(1);
+  }
+
   try {
     // Connect to MongoDB
     logger.info('🔗 Connecting to MongoDB...');

@@ -534,6 +534,15 @@ class APIClient {
   async getSpendingTrends(period = 'daily', days = 30) {
     return this.request(`/analytics/trends?period=${period}&days=${days}`);
   }
+
+  // ==================== SYSTEM ENDPOINTS ====================
+
+  /**
+   * Get app version config
+   */
+  async getAppVersion(platform) {
+    return this.request(`/version?platform=${platform}`);
+  }
 }
 
 // Export singleton instance

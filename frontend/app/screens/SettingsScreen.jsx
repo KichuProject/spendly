@@ -15,6 +15,9 @@ import { checkNotificationPermissions, requestNotificationPermissions, cancelTod
 import { Ionicons } from '@expo/vector-icons';
 import EditProfileModal from '../components/EditProfileModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import VersionUpdateModal from '../components/VersionUpdateModal';
+import { getUpdateStatus } from '../utils/useVersionCheck';
+import Constants from 'expo-constants';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -27,6 +30,10 @@ export default function SettingsScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [updatePlatform, setUpdatePlatform] = useState('android');
+  const [updateApkLink, setUpdateApkLink] = useState('');
 
   // Sync initial switch state strictly with native system permission
   useEffect(() => {
@@ -92,7 +99,7 @@ export default function SettingsScreen() {
       const result = await updateProfile({ name, email });
       if (result) {
         setShowEditModal(false);
-        showToast('Profile updated successfully! 🎉', 'success');
+        showToast('Profile updated successfully!', 'success');
       }
     } catch (error) {
       showToast('Failed to update profile', 'error');
@@ -175,7 +182,29 @@ export default function SettingsScreen() {
             <SettingRow
               icon={<Ionicons name="information-circle-outline" size={20} color="#10B981" />}
               label="About"
-              right={<Text style={styles.valueText}>Spendly v1.0.0</Text>}
+              right={<Text style={styles.valueText}>Spendly v{Constants.expoConfig?.version || '1.0.0'}</Text>}
+            />
+            <View style={styles.divider} />
+            <SettingRow
+              icon={<Ionicons name="cloud-download-outline" size={20} color="#3B82F6" />}
+              label="Check for Updates"
+              right={<Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />}
+              onPress={async () => {
+                showToast('Checking for updates...', 'info', 2000, '🔄');
+                try {
+                  const status = await getUpdateStatus();
+                  if (status.isOutdated) {
+                    setUpdateMessage(status.message);
+                    setUpdatePlatform(status.platform);
+                    setUpdateApkLink(status.apkLink || '');
+                    setShowUpdateModal(true);
+                  } else {
+                    showToast(`Spendly is up to date (v${status.currentVersion})`, 'success', 3000);
+                  }
+                } catch (err) {
+                  showToast('Could not reach update server.', 'error');
+                }
+              }}
             />
           </GlassCard>
 
@@ -211,6 +240,14 @@ export default function SettingsScreen() {
           visible={showPasswordModal}
           onSave={handleSavePassword}
           onCancel={() => setShowPasswordModal(false)}
+        />
+
+        <VersionUpdateModal
+          visible={showUpdateModal}
+          message={updateMessage}
+          platform={updatePlatform}
+          apkLink={updateApkLink}
+          onCancel={() => setShowUpdateModal(false)}
         />
       </View>
     </LiquidBackground>
