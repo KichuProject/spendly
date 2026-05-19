@@ -1213,20 +1213,6 @@
       line-height: 1.5;
     }
 
-    @media (max-width: 768px) {
-      .simulator-layout {
-        grid-template-columns: 1fr;
-      }
-      .arch-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    @media (max-width: 480px) {
-      .arch-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     /* Footer */
     footer {
       padding: 50px 0;
@@ -1238,7 +1224,7 @@
       color: var(--text-muted);
     }
 
-    /* Responsive */
+    /* Highly Optimized Mobile and Responsive Rules */
     @media (max-width: 968px) {
       .hero {
         grid-template-columns: 1fr;
@@ -1265,10 +1251,73 @@
       .dl-left {
         max-width: 100%;
       }
+      /* Hide floating decorative 3D cards that overflow smaller screens */
+      .floating-card-1, .floating-card-2 {
+        display: none !important;
+      }
     }
+
+    @media (max-width: 768px) {
+      /* Hide standard header link text, keep only brand and download button to keep mobile header clean */
+      .nav-links a:not(.btn-header) {
+        display: none !important;
+      }
+      .nav-links {
+        gap: 12px;
+      }
+      .logo span {
+        font-size: 20px;
+      }
+      header {
+        padding: 12px 0;
+      }
+      .simulator-layout {
+        grid-template-columns: 1fr;
+      }
+      .arch-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .sec-title h2 {
+        font-size: 36px;
+      }
+    }
+
     @media (max-width: 480px) {
       .hero h1 {
-        font-size: 40px;
+        font-size: 38px;
+        letter-spacing: -1.5px;
+      }
+      .hero p {
+        font-size: 15px;
+      }
+      .hero-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+      }
+      .hero-buttons a {
+        width: 100%;
+        justify-content: center;
+      }
+      .btn-header {
+        padding: 8px 14px;
+        font-size: 13px;
+      }
+      .logo img {
+        width: 28px;
+        height: 28px;
+      }
+      .logo span {
+        font-size: 18px;
+      }
+      .arch-grid {
+        grid-template-columns: 1fr;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .feature-card {
+        padding: 24px;
       }
       .apk-card {
         width: 100%;
@@ -1278,6 +1327,136 @@
       .btn-dl {
         width: 100%;
         justify-content: center;
+      }
+      .sec-title h2 {
+        font-size: 30px;
+      }
+      .download-glass h2 {
+        font-size: 28px;
+      }
+    }
+
+    /* Mobile Drawer & Toggle Styling */
+    .mobile-menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      color: #FFF;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 101;
+      transition: color 0.3s ease;
+    }
+    .mobile-menu-toggle:hover {
+      color: var(--primary);
+    }
+    .mobile-menu-toggle svg {
+      display: block;
+    }
+    
+    .mobile-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      pointer-events: none;
+      visibility: hidden;
+      transition: visibility 0.4s;
+    }
+    .mobile-drawer.active {
+      pointer-events: auto;
+      visibility: visible;
+    }
+    
+    .drawer-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 1, 10, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .mobile-drawer.active .drawer-overlay {
+      opacity: 1;
+    }
+    
+    .drawer-content {
+      position: absolute;
+      top: 0;
+      right: -320px;
+      width: 300px;
+      height: 100%;
+      background: rgba(9, 5, 26, 0.96);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: -15px 0 45px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      padding: 30px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mobile-drawer.active .drawer-content {
+      transform: translateX(-320px);
+    }
+    
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 50px;
+    }
+    .drawer-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.3s ease;
+    }
+    .drawer-close:hover {
+      color: #FFF;
+    }
+    
+    .drawer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .drawer-link {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+    .drawer-link:hover {
+      color: #FFF;
+      background: linear-gradient(90deg, #A78BFA, #EC4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .btn-drawer-dl {
+      margin-top: 20px;
+      background: var(--gradient-accent);
+      color: #FFF !important;
+      -webkit-text-fill-color: #FFF !important;
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: block !important;
       }
     }
   </style>
@@ -1344,6 +1523,8 @@
         <img src="./assets/Logo.png" alt="Spendly Logo">
         <span>Spendly</span>
       </div>
+      
+      <!-- Desktop Links -->
       <nav class="nav-links">
         <a href="#features">Features</a>
         <a href="#architecture">Architecture</a>
@@ -1353,8 +1534,38 @@
           Download APK
         </a>
       </nav>
+
+      <!-- Hamburger Menu Button (Mobile) -->
+      <button class="mobile-menu-toggle" id="menuToggle" aria-label="Toggle Navigation Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
     </div>
   </header>
+
+  <!-- Mobile Glassmorphic Drawer Menu -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer-content">
+      <div class="drawer-header">
+        <div class="logo">
+          <img src="./assets/Logo.png" alt="Spendly Logo">
+          <span>Spendly</span>
+        </div>
+        <button class="drawer-close" id="drawerClose" aria-label="Close Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <nav class="drawer-links">
+        <a href="#features" class="drawer-link">Features</a>
+        <a href="#architecture" class="drawer-link">Architecture</a>
+        <a href="#faq" class="drawer-link">FAQ</a>
+        <a href="#download" class="drawer-link btn-drawer-dl dl-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download APK
+        </a>
+      </nav>
+    </div>
+  </div>
 
   <!-- Main Hero Layout -->
   <main class="container hero-container">
@@ -1879,7 +2090,36 @@
     }
 
     // Call on load
-    document.addEventListener('DOMContentLoaded', fetchApkDownloadLink);
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchApkDownloadLink();
+      
+      // Mobile Navigation Drawer Toggle Handler
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileDrawer = document.getElementById('mobileDrawer');
+      const drawerClose = document.getElementById('drawerClose');
+      const drawerOverlay = document.getElementById('drawerOverlay');
+      const drawerLinks = document.querySelectorAll('.drawer-link');
+
+      function openDrawer() {
+        mobileDrawer.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeDrawer() {
+        mobileDrawer.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      if (menuToggle && mobileDrawer && drawerClose) {
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        
+        drawerLinks.forEach(link => {
+          link.addEventListener('click', closeDrawer);
+        });
+      }
+    });
   </script>
 </body>
 </html>
