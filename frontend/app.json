@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Spendly",
+    "slug": "spendly",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0C29"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.kishore.spendly",
+      "googleServicesFile": "./google-services.json",
+      "ndkVersion": "26.3.11579264",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F0C29",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "notification": {
+      "icon": "./assets/android-icon-monochrome.png",
+      "color": "#7C3AED"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "80089f1c-3716-455d-87e5-c70778f2d15c"
+      }
+    },
+    "owner": "kishorekichu105"
+  }
+}
