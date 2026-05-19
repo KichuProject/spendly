@@ -65,7 +65,7 @@ class APIClient {
     }
 
     try {
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         ...options,
         headers,
       });
@@ -76,7 +76,7 @@ class APIClient {
         if (refreshed) {
           // Retry the original request
           headers.Authorization = `Bearer ${this.accessToken}`;
-          return fetch(url, { ...options, headers });
+          response = await fetch(url, { ...options, headers });
         } else {
           // Refresh failed, logout user
           await this.logout();
@@ -153,30 +153,30 @@ class APIClient {
   /**
    * Send OTP to email
    */
-  async sendOTP(email, type = 'signup') {
+  async sendOTP(email, type = 'signup', phone = null) {
     return this.request('/auth/send-otp', {
       method: 'POST',
-      body: JSON.stringify({ email, type }),
+      body: JSON.stringify({ email, type, phone }),
     });
   }
 
   /**
    * Verify OTP
    */
-  async verifyOTP(email, otp, name = null, password = null) {
+  async verifyOTP(email, otp, name = null, password = null, phone = null) {
     return this.request('/auth/verify-otp', {
       method: 'POST',
-      body: JSON.stringify({ email, otp, name, password }),
+      body: JSON.stringify({ email, otp, name, password, phone }),
     });
   }
 
   /**
    * Direct password-based login
    */
-  async login(email, password) {
+  async login(emailOrPhone, password) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ emailOrPhone, password }),
     });
   }
 

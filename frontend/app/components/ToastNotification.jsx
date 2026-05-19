@@ -43,7 +43,11 @@ export function ToastProvider({ children }) {
       {toast && (
         <Animated.View style={[styles.toast, { backgroundColor: TOAST_COLORS[toast.type]?.bg, borderColor: TOAST_COLORS[toast.type]?.border, transform: [{ translateY }], opacity }]}>
           {toast.icon ? (
-            <Text style={styles.toastEmojiIcon}>{toast.icon}</Text>
+            React.isValidElement(toast.icon) ? (
+              toast.icon
+            ) : (
+              <Text style={styles.toastEmojiIcon}>{toast.icon}</Text>
+            )
           ) : (
             <Ionicons 
               name={TOAST_COLORS[toast.type]?.iconName} 

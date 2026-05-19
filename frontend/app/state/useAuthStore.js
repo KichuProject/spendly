@@ -9,6 +9,7 @@ const useAuthStore = create((set, get) => ({
   pendingEmail: null,
   pendingName: null,
   pendingPassword: null,
+  pendingPhone: null,
   otpSent: false,
   isLoading: false,
   error: null,
@@ -36,15 +37,16 @@ const useAuthStore = create((set, get) => ({
   /**
    * Start signup - send OTP
    */
-  startSignup: async (name, email, password = null) => {
+  startSignup: async (name, email, password = null, phone = null) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiClient.sendOTP(email, 'signup');
+      const response = await apiClient.sendOTP(email, 'signup', phone);
       if (response.success) {
         set((state) => ({
           pendingName: name,
           pendingEmail: email,
           pendingPassword: password !== null ? password : state.pendingPassword,
+          pendingPhone: phone !== null ? phone : state.pendingPhone,
           otpSent: true,
           isLoading: false,
         }));
@@ -63,10 +65,10 @@ const useAuthStore = create((set, get) => ({
   /**
    * Direct password-based login
    */
-  login: async (email, password) => {
+  login: async (emailOrPhone, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiClient.login(email, password);
+      const response = await apiClient.login(emailOrPhone, password);
       if (response.success) {
         const { accessToken, refreshToken, user } = response;
         
@@ -96,12 +98,12 @@ const useAuthStore = create((set, get) => ({
   verifyOtp: async (otp) => {
     set({ isLoading: true, error: null });
     try {
-      const { pendingEmail, pendingName, pendingPassword } = get();
+      const { pendingEmail, pendingName, pendingPassword, pendingPhone } = get();
       if (!pendingEmail) {
         throw new Error('No pending email found');
       }
 
-      const response = await apiClient.verifyOTP(pendingEmail, otp, pendingName, pendingPassword);
+      const response = await apiClient.verifyOTP(pendingEmail, otp, pendingName, pendingPassword, pendingPhone);
       if (response.success) {
         const { accessToken, refreshToken, user } = response;
         
@@ -115,6 +117,7 @@ const useAuthStore = create((set, get) => ({
           pendingEmail: null,
           pendingName: null,
           pendingPassword: null,
+          pendingPhone: null,
           isLoading: false,
         });
         return true;
@@ -155,6 +158,7 @@ const useAuthStore = create((set, get) => ({
         pendingEmail: null,
         pendingName: null,
         pendingPassword: null,
+        pendingPhone: null,
         otpSent: false,
         isLoading: false,
         error: null,
@@ -191,6 +195,7 @@ const useAuthStore = create((set, get) => ({
       pendingEmail: null,
       pendingName: null,
       pendingPassword: null,
+      pendingPhone: null,
       error: null,
     });
   },

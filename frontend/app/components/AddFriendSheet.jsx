@@ -26,7 +26,10 @@ export default function AddFriendSheet({ visible, onClose, onSave }) {
 
   return (
     <Modal transparent visible={visible} animationType="slide">
-      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView 
+        style={styles.backdrop} 
+        behavior="padding"
+      >
         <Pressable style={styles.dimArea} onPress={onClose} />
         <View style={styles.sheet}>
           <View style={styles.handle} />
@@ -66,12 +69,13 @@ export default function AddFriendSheet({ visible, onClose, onSave }) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
+    justifyContent: 'flex-end',
     ...Platform.select({
       web: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
       default: {},
     }),
   },
-  dimArea: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  dimArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
     backgroundColor: 'rgba(20,16,50,0.98)',
     borderTopLeftRadius: 28,

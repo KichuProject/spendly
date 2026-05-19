@@ -104,6 +104,16 @@ export default function CategoryIcon({ emoji, size = 20, color = '#FFFFFF', disa
         iconColor = '#60A5FA'; // Soft Blue
         break;
 
+      // 📝 Notes / Document
+      case '📝':
+        iconColor = '#A78BFA'; // Vibrant Lavender
+        break;
+
+      // 📭 Empty inbox / Tray
+      case '📭':
+        iconColor = '#60A5FA'; // Soft Blue
+        break;
+
       // 🧍 Solo
       case '🧍':
         iconColor = '#38BDF8'; // Sky Blue
@@ -199,6 +209,14 @@ export default function CategoryIcon({ emoji, size = 20, color = '#FFFFFF', disa
     // 🧍 Solo spend
     case '🧍':
       return <Ionicons name="person" size={size} color={iconColor} style={style} />;
+
+    // 📝 Document / Notes
+    case '📝':
+      return <Ionicons name="document-text" size={size} color={iconColor} style={style} />;
+
+    // 📭 Empty inbox / Tray
+    case '📭':
+      return <Ionicons name="file-tray" size={size} color={iconColor} style={style} />;
 
     // 📌 Pin / Other category fallback
     case '📌':

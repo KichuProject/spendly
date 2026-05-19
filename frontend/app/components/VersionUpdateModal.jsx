@@ -3,7 +3,6 @@ import { View, Text, Pressable, StyleSheet, Animated, Modal, Platform, Linking }
 import { COLORS, GLASS, SHADOWS, SPACING } from '../styles/theme';
 import GlassButton from './GlassButton';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function VersionUpdateModal({ visible, message, platform, apkLink, onCancel }) {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -34,9 +33,7 @@ export default function VersionUpdateModal({ visible, message, platform, apkLink
     }
   };
 
-  const handleCancel = async () => {
-    const now = new Date().toDateString();
-    await AsyncStorage.setItem('last_version_check', now);
+  const handleCancel = () => {
     if (onCancel) onCancel();
   };
 

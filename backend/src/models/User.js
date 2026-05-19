@@ -62,10 +62,12 @@ const userSchema = new mongoose.Schema(
       default: 'INR',
     },
 
-    // Phone number (optional)
     phone: {
       type: String,
-      default: null,
+      unique: true,
+      sparse: true,
+      trim: true,
+      match: [/^\d{10}$/, 'Phone number must be exactly 10 digits'],
     },
 
     // User status
@@ -147,6 +149,7 @@ userSchema.methods.toPublicJSON = function () {
     _id: this._id,
     email: this.email,
     name: this.name,
+    phone: this.phone,
     currency: this.currency,
     isEmailVerified: this.isEmailVerified,
     isActive: this.isActive,

@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient } from './apiClient';
 
 /**
@@ -12,12 +11,14 @@ import { apiClient } from './apiClient';
  *  0 if current === required
  */
 function compareVersions(current, required) {
-  const c = current.split('.').map(Number);
-  const r = required.split('.').map(Number);
+  const c = (current || '1.0.0').split('.').map(num => Number(num) || 0);
+  const r = (required || '1.0.0').split('.').map(num => Number(num) || 0);
 
   for (let i = 0; i < 3; i++) {
-    if (c[i] > r[i]) return 1;
-    if (c[i] < r[i]) return -1;
+    const cVal = c[i] || 0;
+    const rVal = r[i] || 0;
+    if (cVal > rVal) return 1;
+    if (cVal < rVal) return -1;
   }
   return 0;
 }
@@ -64,19 +65,9 @@ export default function useVersionCheck(onUpdateAvailable = null) {
     async function checkVersionOnBoot() {
       try {
         hasCheckedVersion = true;
-        const lastCheck = await AsyncStorage.getItem('last_version_check');
-        const now = new Date().toDateString();
-        
-        // Skip if already checked today (unless in dev mode for testing)
-        if (lastCheck === now && !__DEV__) {
-          return;
-        }
-
         const status = await getUpdateStatus();
         if (status.isOutdated && onUpdateAvailable) {
           onUpdateAvailable(status.message, status.platform, status.apkLink);
-        } else if (!status.isOutdated) {
-          await AsyncStorage.setItem('last_version_check', now);
         }
       } catch (error) {
         console.log("Silent startup version check skipped:", error.message);

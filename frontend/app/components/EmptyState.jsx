@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import GlassCard from './GlassCard';
 import GlassButton from './GlassButton';
+import CategoryIcon from './CategoryIcon';
 import { COLORS, SPACING } from '../styles/theme';
 
 export default function EmptyState({ emoji, icon, title, message, buttonTitle, onButtonPress, style }) {
@@ -11,7 +12,9 @@ export default function EmptyState({ emoji, icon, title, message, buttonTitle, o
         {icon ? (
           <View style={styles.iconContainer}>{icon}</View>
         ) : (
-          <Text style={styles.emoji}>{emoji || '💸'}</Text>
+          <View style={styles.iconContainer}>
+            <CategoryIcon emoji={emoji || '💸'} size={48} />
+          </View>
         )}
         <Text style={styles.title}>{title || 'Nothing here yet'}</Text>
         <Text style={styles.message}>{message || 'Start adding items to see them here!'}</Text>

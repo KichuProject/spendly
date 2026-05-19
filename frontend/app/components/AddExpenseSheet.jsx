@@ -176,7 +176,10 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
 
   return (
     <Modal transparent visible={visible} animationType="slide">
-      <KeyboardAvoidingView style={styles.backdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView 
+        style={styles.backdrop} 
+        behavior="padding"
+      >
         <Pressable style={styles.dimArea} onPress={onClose} />
         <View style={styles.sheet}>
           <View style={styles.handle} />
@@ -432,12 +435,13 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
+    justifyContent: 'flex-end',
     ...Platform.select({
       web: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
       default: {},
     }),
   },
-  dimArea: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  dimArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
     backgroundColor: 'rgba(20,16,50,0.98)',
     borderTopLeftRadius: 28,
@@ -457,7 +461,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   headerTitle: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700' },
   close: { color: COLORS.textMuted, fontSize: 22, padding: 4 },
-  scroll: { maxHeight: 400 },
+  scroll: { maxHeight: Platform.OS === 'web' ? 400 : 250 },
   fieldLabel: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 16 },
   reasonRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   reasonEmoji: { fontSize: 28 },

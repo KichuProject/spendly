@@ -13,7 +13,7 @@ const logger = require('../utils/logger');
 /**
  * Send OTP to email
  */
-const sendOTP = async (email, type = 'signup') => {
+const sendOTP = async (email, type = 'signup', phone = null) => {
   try {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error('Invalid email format');
@@ -25,6 +25,18 @@ const sendOTP = async (email, type = 'signup') => {
     const userExists = await User.findByEmail(email);
     if (userExists) {
       throw new Error('Email already registered. Please login instead.');
+    }
+
+    // Check if phone number already exists and is exactly 10 digits
+    if (phone && type === 'signup') {
+      const trimmedPhone = phone.trim();
+      if (!/^\d{10}$/.test(trimmedPhone)) {
+        throw new Error('Phone number must be exactly 10 digits');
+      }
+      const phoneExists = await User.findOne({ phone: trimmedPhone });
+      if (phoneExists) {
+        throw new Error('Phone number already registered. Please login instead.');
+      }
     }
 
     // Generate OTP
@@ -58,7 +70,7 @@ const sendOTP = async (email, type = 'signup') => {
 /**
  * Verify OTP and create/login user
  */
-const verifyOTP = async (email, otp, name = null, password = null) => {
+const verifyOTP = async (email, otp, name = null, password = null, phone = null) => {
   try {
     const normalizedEmail = email.toLowerCase();
 
@@ -74,9 +86,28 @@ const verifyOTP = async (email, otp, name = null, password = null) => {
       throw new Error('Name is required for signup');
     }
 
+    // Ensure email is not already registered
+    const emailExists = await User.findByEmail(normalizedEmail);
+    if (emailExists) {
+      throw new Error('Email already registered. Please login instead.');
+    }
+
+    // Check phone number uniqueness one final time and ensure it is 10 digits
+    if (phone) {
+      const trimmedPhone = phone.trim();
+      if (!/^\d{10}$/.test(trimmedPhone)) {
+        throw new Error('Phone number must be exactly 10 digits');
+      }
+      const phoneExists = await User.findOne({ phone: trimmedPhone });
+      if (phoneExists) {
+        throw new Error('Phone number already registered. Please login instead.');
+      }
+    }
+
     let user = new User({
       email: normalizedEmail,
       name: name.trim(),
+      phone: phone ? phone.trim() : undefined,
       isEmailVerified: true,
     });
 
@@ -116,16 +147,21 @@ const verifyOTP = async (email, otp, name = null, password = null) => {
 /**
  * Login user using email and password
  */
-const login = async (email, password) => {
+const login = async (emailOrPhone, password) => {
   try {
-    if (!email || !password) {
-      throw new Error('Email and password are required');
+    if (!emailOrPhone || !password) {
+      throw new Error('Email or Phone number and password are required');
     }
 
-    const normalizedEmail = email.toLowerCase();
+    const normalized = emailOrPhone.trim().toLowerCase();
 
-    // Find user by email and select the password field
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    // Find user by email or phone and select the password field
+    const user = await User.findOne({
+      $or: [
+        { email: normalized },
+        { phone: normalized },
+      ],
+    }).select('+password');
 
     if (!user) {
       throw new Error('User not found. Please sign up first.');
@@ -147,7 +183,7 @@ const login = async (email, password) => {
     user.loginStreak = (user.loginStreak || 0) + 1;
     await user.save();
 
-    logger.info(`✅ User logged in: ${normalizedEmail}`);
+    logger.info(`✅ User logged in: ${user.email}`);
 
     // Generate tokens
     const accessToken = generateAccessToken(user._id);
@@ -218,9 +254,9 @@ const logout = async (userId) => {
 /**
  * Resend OTP
  */
-const resendOTP = async (email, purpose = 'signup') => {
+const resendOTP = async (email, purpose = 'signup', phone = null) => {
   try {
-    return await sendOTP(email, 'signup');
+    return await sendOTP(email, 'signup', phone);
   } catch (error) {
     logger.error('Error in resendOTP:', error.message);
     throw error;

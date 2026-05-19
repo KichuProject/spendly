@@ -190,7 +190,7 @@ export default function SettingsScreen() {
               label="Check for Updates"
               right={<Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />}
               onPress={async () => {
-                showToast('Checking for updates...', 'info', 2000, '🔄');
+                showToast('Checking for updates...', 'info', 2000, <Ionicons name="sync-outline" size={20} color="#A78BFA" />);
                 try {
                   const status = await getUpdateStatus();
                   if (status.isOutdated) {

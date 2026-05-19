@@ -20,12 +20,14 @@ export default function LoginScreen() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otpError, setOtpError] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
@@ -61,6 +63,8 @@ export default function LoginScreen() {
     setOtpError(false);
     setNameError('');
     setEmailError('');
+    setPhone('');
+    setPhoneError('');
     setPassword('');
     setConfirmPassword('');
     setPasswordError('');
@@ -68,6 +72,11 @@ export default function LoginScreen() {
   };
 
   const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+  const validateEmailOrPhone = (input) => {
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
+    const isPhone = /^\d{10}$/.test(input.trim());
+    return isEmail || isPhone;
+  };
 
   const handleAuthSubmit = async () => {
     setNameError('');
@@ -102,12 +111,21 @@ export default function LoginScreen() {
     if (tab === 'signup') {
       if (!name.trim()) { setNameError('Please enter your name'); return; }
       if (!validateEmail(email)) { setEmailError('Please enter a valid email'); return; }
+      const phoneDigits = phone.replace(/[\s-()]/g, '');
+      if (!phone.trim()) {
+        setPhoneError('Please enter your phone number');
+        return;
+      }
+      if (!/^\d{10}$/.test(phoneDigits)) {
+        setPhoneError('Phone number must be exactly 10 digits');
+        return;
+      }
       if (!password) { setPasswordError('Password is required'); return; }
       if (password.length < 6) { setPasswordError('Password must be at least 6 characters'); return; }
       if (password !== confirmPassword) { setConfirmPasswordError('Passwords do not match'); return; }
       
       try {
-        const result = await startSignup(name.trim(), email.trim(), password);
+        const result = await startSignup(name.trim(), email.trim(), password, phoneDigits);
         if (result) {
           setStep(2);
           setCountdown(30);
@@ -121,7 +139,7 @@ export default function LoginScreen() {
       }
       
     } else {
-      if (!validateEmail(email)) { setEmailError('Please enter a valid email'); return; }
+      if (!validateEmailOrPhone(email)) { setEmailError('Please enter a valid email or phone number'); return; }
       if (!password) { setPasswordError('Password is required'); return; }
       
       try {
@@ -242,14 +260,24 @@ export default function LoginScreen() {
                       />
                     )}
                     <GlassInput
-                      placeholder="Email Address"
+                      placeholder={tab === 'login' ? "Email or Phone Number" : "Email Address"}
                       value={email}
                       onChangeText={(val) => { setEmail(val); setEmailError(''); }}
-                      icon="✉️"
+                      icon={tab === 'login' ? "👤" : "✉️"}
                       error={emailError}
-                      keyboardType="email-address"
+                      keyboardType={tab === 'login' ? "default" : "email-address"}
                       autoCapitalize="none"
                     />
+                    {tab === 'signup' && (
+                      <GlassInput
+                        placeholder="Phone Number"
+                        value={phone}
+                        onChangeText={(val) => { setPhone(val); setPhoneError(''); }}
+                        icon="📱"
+                        error={phoneError}
+                        keyboardType="phone-pad"
+                      />
+                    )}
                     {tab !== 'forgot' && (
                       <GlassInput
                         placeholder="Password"

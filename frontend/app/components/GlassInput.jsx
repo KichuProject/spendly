@@ -71,13 +71,14 @@ export default function GlassInput({
         ]}
       >
         {icon && (
-          typeof icon === 'string' && ['👤', '✉️', '🔑', '🔒', '🔐', '🔍'].includes(icon) ? (
+          typeof icon === 'string' && ['👤', '✉️', '🔑', '🔒', '🔐', '🔍', '📱'].includes(icon) ? (
             <Ionicons
               name={
                 icon === '👤' ? 'person-outline' :
                 icon === '✉️' ? 'mail-outline' :
                 icon === '🔑' || icon === '🔒' || icon === '🔐' ? 'lock-closed-outline' :
-                icon === '🔍' ? 'search-outline' : 'help-circle-outline'
+                icon === '🔍' ? 'search-outline' :
+                icon === '📱' ? 'call-outline' : 'help-circle-outline'
               }
               size={18}
               color={
@@ -87,12 +88,14 @@ export default function GlassInput({
                   icon === '✉️' ? '#C084FC' :
                   icon === '🔑' || icon === '🔒' || icon === '🔐' ? '#FBBF24' :
                   icon === '🔍' ? '#34D399' :
+                  icon === '📱' ? '#A78BFA' :
                   '#A78BFA'
                 ) : (
                   icon === '👤' ? 'rgba(56, 189, 248, 0.4)' :
                   icon === '✉️' ? 'rgba(192, 132, 252, 0.4)' :
                   icon === '🔑' || icon === '🔒' || icon === '🔐' ? 'rgba(251, 191, 36, 0.4)' :
                   icon === '🔍' ? 'rgba(52, 211, 153, 0.4)' :
+                  icon === '📱' ? 'rgba(167, 139, 250, 0.4)' :
                   COLORS.textMuted
                 )
               }

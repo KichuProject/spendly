@@ -21,7 +21,7 @@ const logger = require('../utils/logger');
  */
 const handleSendOTP = async (req, res, next) => {
   try {
-    const { email, type } = req.body;
+    const { email, type, phone } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -32,7 +32,7 @@ const handleSendOTP = async (req, res, next) => {
 
     const validType = type === 'signup' ? 'signup' : 'login';
 
-    const result = await sendOTP(email, validType);
+    const result = await sendOTP(email, validType, phone);
 
     res.status(200).json(result);
   } catch (error) {
@@ -50,7 +50,7 @@ const handleSendOTP = async (req, res, next) => {
  */
 const handleVerifyOTP = async (req, res, next) => {
   try {
-    const { email, otp, name } = req.body;
+    const { email, otp, name, password, phone } = req.body;
 
     if (!email || !otp) {
       return res.status(400).json({
@@ -66,7 +66,7 @@ const handleVerifyOTP = async (req, res, next) => {
       });
     }
 
-    const result = await verifyOTP(email, otp, name);
+    const result = await verifyOTP(email, otp, name, password, phone);
 
     res.status(200).json(result);
   } catch (error) {
@@ -138,7 +138,7 @@ const handleLogout = async (req, res, next) => {
  */
 const handleResendOTP = async (req, res, next) => {
   try {
-    const { email, type } = req.body;
+    const { email, type, phone } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -149,7 +149,7 @@ const handleResendOTP = async (req, res, next) => {
 
     const validType = type === 'signup' ? 'signup' : 'login';
 
-    const result = await resendOTP(email, validType);
+    const result = await resendOTP(email, validType, phone);
 
     res.status(200).json(result);
   } catch (error) {
@@ -539,16 +539,17 @@ const handleVerifyResetToken = async (req, res, next) => {
  */
 const handleLogin = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, emailOrPhone, password } = req.body;
+    const identifier = emailOrPhone || email;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required',
+        message: 'Email or Phone number and password are required',
       });
     }
 
-    const result = await login(email, password);
+    const result = await login(identifier, password);
 
     res.status(200).json(result);
   } catch (error) {

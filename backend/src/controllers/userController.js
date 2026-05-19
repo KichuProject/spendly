@@ -229,7 +229,27 @@ const handleUpdateProfile = async (req, res, next) => {
       user.email = email.toLowerCase().trim();
     }
     if (currency) user.currency = currency;
-    if (phone) user.phone = phone;
+    if (phone !== undefined) {
+      if (phone === null || phone.trim() === '') {
+        user.phone = undefined;
+      } else {
+        const trimmedPhone = phone.trim();
+        if (!/^\d{10}$/.test(trimmedPhone)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Phone number must be exactly 10 digits',
+          });
+        }
+        const existingPhone = await User.findOne({ phone: trimmedPhone, _id: { $ne: userId } });
+        if (existingPhone) {
+          return res.status(400).json({
+            success: false,
+            message: 'Phone number already in use',
+          });
+        }
+        user.phone = trimmedPhone;
+      }
+    }
 
     await user.save();
 

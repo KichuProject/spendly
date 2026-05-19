@@ -226,7 +226,7 @@ const useFriendsStore = create(
 
         friendExp.forEach((exp) => {
           if (!exp.splits) return;
-          const split = exp.splits.find((s) => s.friendId.toString() === friendId.toString());
+          const split = exp.splits.find((s) => s.friendId && s.friendId.toString() === friendId.toString());
           if (!split) return;
 
           if (split.direction === 'theyOwe') {
@@ -272,8 +272,9 @@ const useFriendsStore = create(
        * Get friend expenses (local calculation)
        */
       getFriendExpenses: (friendId, expenses) => {
+        if (!friendId || !Array.isArray(expenses)) return [];
         return expenses.filter((exp) =>
-          exp.splits && exp.splits.some((s) => s.friendId.toString() === friendId)
+          exp.splits && exp.splits.some((s) => s.friendId && s.friendId.toString() === friendId)
         );
       },
 
@@ -292,7 +293,7 @@ const useFriendsStore = create(
 
           friendExp.forEach((exp) => {
             if (!exp.splits) return;
-            const split = exp.splits.find((s) => s.friendId.toString() === friend._id);
+            const split = exp.splits.find((s) => s.friendId && s.friendId.toString() === friend._id);
             if (!split) return;
 
             if (split.direction === 'theyOwe') {
