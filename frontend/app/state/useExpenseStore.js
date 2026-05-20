@@ -445,7 +445,9 @@ const useExpenseStore = create(
         const dbDeleted = user?.deletedNotifications || [];
 
         const startLimit = getStartOfDay(installDate);
-        const today = getStartOfDay(new Date());
+        const isPast10PM = new Date().getHours() >= 22;
+        const maxDay = isPast10PM ? new Date() : new Date(Date.now() - 86400000);
+        const today = getStartOfDay(maxDay);
         const days = [];
         const current = new Date(today);
         

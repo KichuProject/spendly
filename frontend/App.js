@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { StatusBar, View, StyleSheet, Platform, LogBox } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
@@ -44,7 +45,7 @@ const FriendsStack = createStackNavigator();
 
 function HomeStackScreen() {
   return (
-    <HomeStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' } }}>
+    <HomeStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent', flex: 1, height: Platform.OS === 'web' ? '100%' : undefined } }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="DayDetail" component={DayDetailScreen} />
       <HomeStack.Screen name="Notifications" component={NotificationsScreen} />
@@ -54,7 +55,7 @@ function HomeStackScreen() {
 
 function FriendsStackScreen() {
   return (
-    <FriendsStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent' } }}>
+    <FriendsStack.Navigator screenOptions={{ headerShown: false, cardStyle: { backgroundColor: 'transparent', flex: 1, height: Platform.OS === 'web' ? '100%' : undefined } }}>
       <FriendsStack.Screen name="FriendsMain" component={FriendsScreen} />
       <FriendsStack.Screen name="FriendDetail" component={FriendDetailScreen} />
     </FriendsStack.Navigator>
@@ -65,6 +66,7 @@ function MainTabs() {
   return (
     <Tab.Navigator
       tabBar={(props) => <NavBar {...props} />}
+      sceneContainerStyle={{ flex: 1, height: Platform.OS === 'web' ? '100%' : undefined }}
       screenOptions={{
         headerShown: false,
         tabBarStyle: { display: 'none' },
@@ -120,6 +122,10 @@ export default function App() {
     let responseSubscription = null;
 
     async function setupNotifications() {
+      if (Platform.OS === 'web') {
+        return; // Push notifications are not supported/needed on web platform
+      }
+
       const isExpoGo = Constants?.appOwnership === 'expo';
       if (isExpoGo) {
         return; // Silent bypass inside Expo Go to prevent library crash
@@ -227,21 +233,23 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <ToastProvider>
-        <NavigationContainer ref={navigationRef}>
-          <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
-          {isAuthenticated ? <MainTabs /> : <LoginScreen />}
-        </NavigationContainer>
-        <VersionUpdateModal 
-          visible={updateModalVisible} 
-          message={updateMessage} 
-          platform={updatePlatform} 
-          apkLink={updateApkLink}
-          onCancel={() => setUpdateModalVisible(false)} 
-        />
-      </ToastProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider style={Platform.OS === 'web' ? { height: '100vh', width: '100vw', overflow: 'hidden' } : { flex: 1 }}>
+        <ToastProvider>
+          <NavigationContainer ref={navigationRef}>
+            <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
+            {isAuthenticated ? <MainTabs /> : <LoginScreen />}
+          </NavigationContainer>
+          <VersionUpdateModal 
+            visible={updateModalVisible} 
+            message={updateMessage} 
+            platform={updatePlatform} 
+            apkLink={updateApkLink}
+            onCancel={() => setUpdateModalVisible(false)} 
+          />
+        </ToastProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

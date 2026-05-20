@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import LiquidBackground from '../components/LiquidBackground';
@@ -264,7 +264,7 @@ export default function FriendDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%' },
+  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12, gap: 10, flexShrink: 0 },
   backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   backText: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '300', lineHeight: 24, marginTop: -2 },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   settlementPaid: { backgroundColor: 'rgba(52,211,153,0.1)', borderColor: 'rgba(52,211,153,0.3)' },
   settlementPending: { backgroundColor: 'rgba(251,113,133,0.1)', borderColor: 'rgba(251,113,133,0.3)' },
   settlementText: { fontSize: 13, fontWeight: '700' },
-  scrollContainer: { flex: 1, marginBottom: 150 },
+  scrollContainer: { flex: 1, minHeight: 0, marginBottom: 150 },
   bottomActions: { position: 'absolute', bottom: 90, left: 16, right: 16, flexDirection: 'row', gap: 10 },
   settleAllBtn: { flex: 1, backgroundColor: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.3)', borderWidth: 1.5, borderRadius: 18, paddingVertical: 14, alignItems: 'center' },
   settleAllText: { color: COLORS.positive, fontSize: 14, fontWeight: '700' },

@@ -184,7 +184,7 @@ export default function StatsScreen() {
 
         <FilterBar filters={TIMEFRAMES} activeFilter={statsTimeframe} onFilterChange={setStatsTimeframe} />
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false}>
           {!hasData ? (
             <EmptyState emoji="📊" title="No data yet" message="Add expenses to see analytics." />
           ) : (
@@ -295,7 +295,7 @@ export default function StatsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%' },
+  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 8 },
   title: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   monthPicker: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },

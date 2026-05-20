@@ -40,8 +40,10 @@ app.use(
         'http://localhost:19006',
         'http://localhost:5000',
         'http://localhost:5500',
+        'http://localhost:8081',
         'http://127.0.0.1:5000',
         'http://127.0.0.1:5500',
+        'http://127.0.0.1:8081',
       ];
       
       // Check if origin is allowed
@@ -122,6 +124,14 @@ app.get('/api', (req, res) => {
       users: '/api/users',
     },
   });
+});
+
+// SPA fallback: For any non-API client routes (like /settings, /friends), serve the main frontend index.html
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.includes('.')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../public/app.html'));
 });
 
 // 404 handler

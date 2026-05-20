@@ -126,7 +126,7 @@ export default function SettingsScreen() {
       <View style={[styles.container, { paddingTop: getScreenPaddingTop(insets.top) }]}>
         <Text style={styles.pageTitle}>Settings</Text>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false}>
           {/* Profile Card */}
           <GlassCard variant="hero" style={styles.profileCard}>
             <Pressable
@@ -271,7 +271,7 @@ function SettingRow({ icon, label, right, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%' },
+  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   pageTitle: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800', paddingHorizontal: 20, marginBottom: 16 },
   profileCard: { marginHorizontal: 16, marginBottom: 16, alignItems: 'center', paddingVertical: 28 },
   profileAvatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(124,58,237,0.3)', borderWidth: 2, borderColor: 'rgba(124,58,237,0.5)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },

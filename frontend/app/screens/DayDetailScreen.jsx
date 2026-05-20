@@ -175,7 +175,7 @@ export default function DayDetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%' },
+  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8, gap: 10 },
   backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
   backText: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '300', lineHeight: 24, marginTop: -2 },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 11, fontWeight: '700' },
   headerTotal: { color: COLORS.textPrimary, fontSize: 20, fontWeight: '800' },
   list: { paddingTop: 8 },
-  scrollContainer: { flex: 1, marginBottom: 150 },
+  scrollContainer: { flex: 1, minHeight: 0, marginBottom: 150 },
   bottomAction: { position: 'absolute', bottom: 90, left: 16, right: 16 },
   completeCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(16,185,129,0.12)', borderColor: 'rgba(16,185,129,0.3)' },
   completeText: { color: COLORS.positive, fontSize: 15, fontWeight: '700' },

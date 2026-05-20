@@ -1,0 +1,14 @@
+{
+  "name": "spendly-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo for Spendly Application",
+  "private": true,
+  "scripts": {
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install && cd .. && node scripts/build-merge.js",
+    "start": "cd backend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run web"
+  }
+}

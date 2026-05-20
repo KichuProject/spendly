@@ -219,6 +219,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#020412',
     overflow: 'hidden',
+    height: Platform.OS === 'web' ? '100%' : undefined,
   },
   auroraContainer: {
     ...StyleSheet.absoluteFillObject,

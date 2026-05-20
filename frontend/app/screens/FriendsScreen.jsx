@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LiquidBackground from '../components/LiquidBackground';
 import GlassCard from '../components/GlassCard';
@@ -95,7 +95,7 @@ export default function FriendsScreen({ navigation }) {
 
         <FilterBar filters={FILTERS} activeFilter={friendsFilter} onFilterChange={setFriendsFilter} />
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false}>
           {filtered.length > 0 ? (
             filtered.map(({ friend, balance }) => (
               <FriendCard
@@ -124,7 +124,7 @@ export default function FriendsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%' },
+  container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
   title: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
   summaryCard: { marginHorizontal: 16, marginBottom: 8 },

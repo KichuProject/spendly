@@ -7,6 +7,7 @@ import GlassButton from './GlassButton';
 const DAYS_HEADER = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function DateRangePicker({ visible, onClose, onSelect, singleDate = false, installDate }) {
+  if (!visible) return null;
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
