@@ -47,7 +47,13 @@ app.use(
       ];
       
       // Check if origin is allowed
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith('chrome-extension://')) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.startsWith('chrome-extension://') ||
+        origin.includes('spendlytracker.onrender.com') ||
+        origin.includes('onrender.com')
+      ) {
         return callback(null, true);
       }
       
