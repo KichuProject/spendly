@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Downloading Spendly...</title>
+  <link rel="icon" type="image/png" href="./assets/Logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050211;
+      --primary: #8B5CF6;
+      --secondary: #EC4899;
+      --text-main: #FFFFFF;
+      --text-muted: #8E8A9F;
+      --gradient-accent: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #020412 0%, #05082B 40%, #080D2E 70%, #030818 100%);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Ambient background glows */
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      top: 10%;
+      left: 15%;
+      width: 400px;
+      height: 400px;
+      background: rgba(139, 92, 246, 0.15);
+    }
+    .orb-2 {
+      bottom: 10%;
+      right: 15%;
+      width: 400px;
+      height: 400px;
+      background: rgba(236, 72, 153, 0.12);
+    }
+
+    /* Glassmorphic Container */
+    .container {
+      width: 90%;
+      max-width: 450px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 32px;
+      padding: 48px 32px;
+      text-align: center;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.02);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Logo */
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 36px;
+    }
+    .logo span {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    /* Download Spinner / Animation */
+    .download-visual {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 32px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .spinner-ring {
+      position: absolute;
+      inset: 0;
+      border: 4px solid rgba(255, 255, 255, 0.05);
+      border-top-color: var(--primary);
+      border-bottom-color: var(--secondary);
+      border-radius: 50%;
+      animation: spin 1.8s linear infinite;
+    }
+    .arrow-icon {
+      color: #A78BFA;
+      animation: bounce 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes bounce {
+      0% { transform: translateY(-4px); }
+      100% { transform: translateY(4px); }
+    }
+
+    h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #CBD5E1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* Action Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px 24px;
+      border-radius: 16px;
+      border: none;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--gradient-accent);
+      color: #FFFFFF;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5);
+      transform: translateY(-2px);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Error State */
+    .error-container {
+      display: none;
+    }
+    .error-icon {
+      color: #EF4444;
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .error-text {
+      color: #F87171 !important;
+    }
+    .btn-retry {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+    }
+    .btn-retry:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Footer */
+    .footer {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="container">
+    <div class="logo">
+      <img src="./assets/Logo.png" alt="Spendly Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+      <!-- Fallback Inline SVG Logo (shows if Logo.png is not accessible) -->
+      <svg style="display:none; width:32px; height:32px; vertical-align:middle; filter:drop-shadow(0 4px 10px rgba(139,92,246,0.3))" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8B5CF6" />
+            <stop offset="100%" stop-color="#EC4899" />
+          </linearGradient>
+        </defs>
+        <rect x="2" y="4" width="20" height="16" rx="4" fill="url(#logo-grad)" />
+        <circle cx="17" cy="12" r="2" fill="#FFFFFF" opacity="0.8" />
+        <path d="M2 9.5H22" stroke="#FFFFFF" stroke-width="1.5" />
+      </svg>
+      <span>Spendly</span>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="loading-state">
+      <div class="download-visual">
+        <div class="spinner-ring"></div>
+        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </div>
+      <h1 id="status-title">Downloading app...</h1>
+      <p id="status-desc">Your download is starting automatically. If nothing happens, you can click the button below.</p>
+      
+      <a href="#" id="download-btn" class="btn btn-primary" style="display: none;">
+        <span>Download APK Manually</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </a>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="error-state" class="error-container">
+      <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <h1>Download Failed</h1>
+      <p class="error-text">Failed to fetch download link. Please check your internet connection and try again.</p>
+      <button onclick="window.location.reload()" class="btn btn-retry">
+        <span>Try Again</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="footer">
+    &copy; 2026 Spendly. Secured with end-to-end encryption.
+  </div>
+
+  <script>
+    async function initDownload() {
+      const loadingState = document.getElementById('loading-state');
+      const errorState = document.getElementById('error-state');
+      const downloadBtn = document.getElementById('download-btn');
+      
+      try {
+        // Resolve backend origin dynamically to prevent cross-origin issues
+        let backendOrigin = '';
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          // If running locally, ALWAYS point to the backend server on port 5000
+          backendOrigin = 'http://localhost:5000';
+        } else if (window.location.protocol === 'file:') {
+          // If opened directly from file system
+          backendOrigin = 'http://localhost:5000';
+        } else {
+          // In production, use the current origin
+          backendOrigin = window.location.origin;
+        }
+
+        // Fetch version config from backend
+        const response = await fetch(`${backendOrigin}/api/version?platform=android`);
+        if (!response.ok) throw new Error('Failed to fetch apkLink');
+        
+        const payload = await response.json();
+        if (payload.success && payload.data && payload.data.apkLink) {
+          const apkLink = payload.data.apkLink;
+          
+          // Set fallback manual button href
+          downloadBtn.href = apkLink;
+          downloadBtn.style.display = 'inline-flex';
+          
+          // Trigger the download automatically after a brief delay
+          setTimeout(() => {
+            const link = document.createElement("a");
+            link.href = apkLink;
+            link.download = "Spendly.apk";
+            link.click();
+          }, 800);
+        } else {
+          throw new Error('Invalid payload or missing apkLink');
+        }
+      } catch (err) {
+        console.error('Download error:', err);
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDownload);
+  </script>
+</body>
+</html>
