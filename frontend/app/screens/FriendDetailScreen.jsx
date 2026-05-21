@@ -83,26 +83,26 @@ export default function FriendDetailScreen({ route, navigation }) {
   const handleSettleAll = () => {
     settleAllWithFriend(friendId);
     setShowSettleAll(false);
-    showToast('All settled! ✅', 'success');
+    showToast('All settled!', 'success', 3000, <Ionicons name="checkmark-done-circle-outline" size={20} color="#10B981" />);
   };
 
   const handleSaveExpenseFriends = (expense) => {
     addExpense(expense);
-    showToast('Expense added! 💾', 'success');
+    showToast('Expense added!', 'success', 3000, <Ionicons name="receipt-outline" size={20} color="#10B981" />);
   };
 
   const handleDeleteExpense = () => {
     if (deleteId) {
       deleteExpense(deleteId);
       setDeleteId(null);
-      showToast('Expense deleted 🗑️', 'info');
+      showToast('Expense deleted', 'info', 3000, <Ionicons name="trash-outline" size={20} color="#A78BFA" />);
     }
   };
 
   const handleUpdateFriendName = async (newName) => {
     const success = await updateFriend(friendId, { name: newName });
     if (success) {
-      showToast('Name updated successfully! 👤', 'success');
+      showToast('Name updated successfully!', 'success', 3000, <Ionicons name="person-outline" size={20} color="#10B981" />);
     } else {
       showToast('Failed to update name', 'error');
     }
@@ -112,7 +112,7 @@ export default function FriendDetailScreen({ route, navigation }) {
     const success = await removeFriend(friendId);
     setShowDeleteFriendConfirm(false);
     if (success) {
-      showToast('Friend removed successfully 👥', 'info');
+      showToast('Friend removed successfully', 'info', 3000, <Ionicons name="person-remove-outline" size={20} color="#A78BFA" />);
       navigation.goBack();
     } else {
       showToast('Failed to remove friend', 'error');

@@ -79,7 +79,7 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
           <View style={styles.handle} />
           <View style={styles.header}>
             <Text style={styles.headerTitle}>
-              {editExpense ? 'Edit Expense ✏️' : 'Add Expense ✨'}
+              {editExpense ? 'Edit Expense ✏️' : 'Add Expense 💵'}
             </Text>
             <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={styles.close}>✕</Text></Pressable>
           </View>
@@ -98,24 +98,6 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
               />
             </View>
 
-            {reason.trim().length > 0 && categoryInfo && categoryInfo.name !== 'Other' && (
-              <View style={[styles.categoryHintCard, { borderColor: categoryInfo.color + '25', backgroundColor: categoryInfo.color + '0a' }]}>
-                <View style={styles.categoryHintHeader}>
-                  <Text style={styles.categoryHintBulb}>✨</Text>
-                  <Text style={styles.categoryHintLabel}>Auto-detected:</Text>
-                  <View style={[styles.categoryHintBadge, { backgroundColor: categoryInfo.color + '15', borderColor: categoryInfo.color + '30' }]}>
-                    <Text style={[styles.categoryHintBadgeText, { color: categoryInfo.color }]}>
-                      {categoryInfo.emoji} {categoryInfo.name}
-                    </Text>
-                  </View>
-                </View>
-                {keywords.length > 0 && (
-                  <Text style={styles.categoryHintKeywords} numberOfLines={1}>
-                    💡 Also in this category: {keywords.join(', ')}
-                  </Text>
-                )}
-              </View>
-            )}
 
             {/* Amount */}
             <Text style={styles.fieldLabel}>How much?</Text>

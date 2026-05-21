@@ -188,7 +188,7 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
               <Text style={styles.headerTitle}>
                 {editExpense ? 'Edit Expense' : 'Add Expense'}
               </Text>
-              <Ionicons name={editExpense ? 'create-outline' : 'sparkles'} size={20} color={editExpense ? '#38BDF8' : '#FBBF24'} />
+              <Ionicons name={editExpense ? 'create-outline' : 'cash-outline'} size={20} color={editExpense ? '#38BDF8' : '#34D399'} />
             </View>
             <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={styles.close}>✕</Text></Pressable>
           </View>
@@ -208,25 +208,6 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
                 style={styles.reasonInput}
               />
             </View>
-
-            {reason.trim().length > 0 && categoryInfo && categoryInfo.name !== 'Other' && (
-              <View style={[styles.categoryHintCard, { borderColor: categoryInfo.color + '25', backgroundColor: categoryInfo.color + '0a' }]}>
-                <View style={styles.categoryHintHeader}>
-                  <Text style={styles.categoryHintBulb}>✨</Text>
-                  <Text style={styles.categoryHintLabel}>Auto-detected:</Text>
-                  <View style={[styles.categoryHintBadge, { backgroundColor: categoryInfo.color + '15', borderColor: categoryInfo.color + '30' }]}>
-                    <Text style={[styles.categoryHintBadgeText, { color: categoryInfo.color }]}>
-                      {categoryInfo.emoji} {categoryInfo.name}
-                    </Text>
-                  </View>
-                </View>
-                {keywords.length > 0 && (
-                  <Text style={styles.categoryHintKeywords} numberOfLines={1}>
-                    💡 Also in this category: {keywords.join(', ')}
-                  </Text>
-                )}
-              </View>
-            )}
 
             {/* Amount */}
             <Text style={styles.fieldLabel}>How much?</Text>

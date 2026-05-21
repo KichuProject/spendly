@@ -177,6 +177,37 @@ const handleGetProfile = async (req, res, next) => {
       });
     }
 
+    // Calculate and update daily login streak
+    const now = new Date();
+    const lastLogin = user.lastLogin;
+
+    if (!lastLogin) {
+      user.loginStreak = 1;
+      user.lastLogin = now;
+      await user.save();
+    } else {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const lastDate = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
+      const diffTime = today - lastDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        // Consecutive day visit - increment streak
+        user.loginStreak = (user.loginStreak || 0) + 1;
+        user.lastLogin = now;
+        await user.save();
+      } else if (diffDays > 1) {
+        // Missed a whole day - reset streak to 1 (new login session today)
+        user.loginStreak = 1;
+        user.lastLogin = now;
+        await user.save();
+      } else if (diffDays === 0) {
+        // Same day opening - keep current streak, just refresh lastLogin timestamp
+        user.lastLogin = now;
+        await user.save();
+      }
+    }
+
     res.status(200).json({
       success: true,
       data: user.toPublicJSON(),

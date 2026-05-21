@@ -95,16 +95,16 @@ export default function DayDetailScreen({ route, navigation }) {
     if (expense.id && expenses.find((e) => e.id === expense.id)) updateExpense(expense.id, expense);
     else addExpense({ ...expense, date: new Date(date).toISOString() });
     setEditExpense(null);
-    showToast('Expense saved! 💰', 'success');
+    showToast('Expense saved!', 'success', 3000, <Ionicons name="cash-outline" size={20} color="#10B981" />);
   };
 
   const handleDelete = () => {
-    if (deleteId) { deleteExpense(deleteId); setDeleteId(null); showToast('Expense deleted', 'info'); }
+    if (deleteId) { deleteExpense(deleteId); setDeleteId(null); showToast('Expense deleted', 'info', 3000, <Ionicons name="trash-outline" size={20} color="#A78BFA" />); }
   };
 
   const toggleComplete = () => {
     if (isComplete) unmarkDayComplete(dateKey);
-    else { markDayComplete(dateKey); showToast('Day marked complete! ✅', 'success'); }
+    else { markDayComplete(dateKey); showToast('Day marked complete!', 'success', 3000, <Ionicons name="calendar-outline" size={20} color="#10B981" />); }
   };
 
   return (

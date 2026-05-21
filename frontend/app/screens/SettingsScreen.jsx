@@ -18,6 +18,7 @@ import ChangePasswordModal from '../components/ChangePasswordModal';
 import VersionUpdateModal from '../components/VersionUpdateModal';
 import { getUpdateStatus } from '../utils/useVersionCheck';
 import Constants from 'expo-constants';
+import packageJson from '../../package.json';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -69,7 +70,7 @@ export default function SettingsScreen() {
       if (granted) {
         await AsyncStorage.setItem('USER_NOTIF_PREF', 'enabled');
         setNotifEnabled(true);
-        showToast('Notifications enabled!', 'success', 3000, '✨');
+        showToast('Notifications enabled!', 'success', 3000, <Ionicons name="sparkles-outline" size={20} color="#10B981" />);
         
         // Schedule if today is incomplete
         const todayKey = toDateKey(new Date());
@@ -77,14 +78,14 @@ export default function SettingsScreen() {
         const { scheduleTodayReminderIfNeeded } = require('../utils/notificationService');
         await scheduleTodayReminderIfNeeded(isTodayComplete);
       } else {
-        showToast('System blocked! Redirecting to settings...', 'info', 3000, '⚠️');
+        showToast('System blocked! Redirecting to settings...', 'warning', 3000, <Ionicons name="warning-outline" size={20} color="#F59E0B" />);
         setTimeout(() => {
           Linking.openSettings();
         }, 1000);
       }
     } else {
       // To keep perfectly synced with OS, redirect to OS settings to disable
-      showToast('Redirecting to settings to disable...', 'info', 3000, '⚙️');
+      showToast('Redirecting to settings to disable...', 'info', 3000, <Ionicons name="settings-outline" size={20} color="#A78BFA" />);
       setTimeout(() => {
         Linking.openSettings();
       }, 1000);
@@ -112,7 +113,7 @@ export default function SettingsScreen() {
       const result = await changePassword(currentPassword, newPassword);
       if (result) {
         setShowPasswordModal(false);
-        showToast('Password updated successfully! 🔐', 'success');
+        showToast('Password updated successfully!', 'success', 3000, <Ionicons name="lock-closed-outline" size={20} color="#10B981" />);
       }
     } catch (error) {
       showToast('Failed to change password', 'error');
@@ -171,7 +172,7 @@ export default function SettingsScreen() {
           </GlassCard>
 
           <GlassCard style={styles.section}>
-            <Pressable onPress={() => showToast('Coming soon! 🚀', 'info')} style={[styles.settingRow, WEB_STYLES.cursor]}>
+            <Pressable onPress={() => showToast('Coming soon!', 'info', 3000, <Ionicons name="rocket-outline" size={20} color="#A78BFA" />)} style={[styles.settingRow, WEB_STYLES.cursor]}>
               <View style={styles.settingIconContainer}>
                 <Text style={{ fontSize: 20 }}>📤</Text>
               </View>
@@ -182,7 +183,7 @@ export default function SettingsScreen() {
             <SettingRow
               icon={<Ionicons name="information-circle-outline" size={20} color="#10B981" />}
               label="About"
-              right={<Text style={styles.valueText}>Spendly v{Constants.expoConfig?.version || '1.0.0'}</Text>}
+              right={<Text style={styles.valueText}>Spendly v{packageJson.version || Constants.expoConfig?.version || '1.0.0'}</Text>}
             />
             <View style={styles.divider} />
             <SettingRow

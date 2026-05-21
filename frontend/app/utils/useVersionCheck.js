@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { apiClient } from './apiClient';
+import packageJson from '../../package.json';
 
 /**
  * Compare two semantic versions (e.g., '1.2.0' and '1.0.5')
@@ -28,7 +29,7 @@ function compareVersions(current, required) {
  * Returns { isOutdated: boolean, message: string, platform: string, latestVersion: string, currentVersion: string }
  */
 export async function getUpdateStatus() {
-  const currentVersion = Constants.expoConfig?.version || '1.0.0';
+  const currentVersion = packageJson.version || Constants.expoConfig?.version || '1.0.0';
   const platform = Platform.OS === 'ios' ? 'ios' : 'android';
 
   const response = await apiClient.getAppVersion(platform);

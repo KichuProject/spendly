@@ -109,6 +109,8 @@ const verifyOTP = async (email, otp, name = null, password = null, phone = null)
       name: name.trim(),
       phone: phone ? phone.trim() : undefined,
       isEmailVerified: true,
+      loginStreak: 1,
+      lastLogin: new Date(),
     });
 
     await user.save();
@@ -179,8 +181,27 @@ const login = async (emailOrPhone, password) => {
 
     // Login successful
     user.isEmailVerified = true;
-    user.lastLogin = new Date();
-    user.loginStreak = (user.loginStreak || 0) + 1;
+    
+    const now = new Date();
+    const lastLogin = user.lastLogin;
+    
+    if (!lastLogin) {
+      user.loginStreak = 1;
+    } else {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const lastDate = new Date(lastLogin.getFullYear(), lastLogin.getMonth(), lastLogin.getDate());
+      const diffTime = today - lastDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        user.loginStreak = (user.loginStreak || 0) + 1;
+      } else if (diffDays > 1) {
+        user.loginStreak = 1;
+      }
+      // If diffDays === 0, keep current streak (same day login)
+    }
+    
+    user.lastLogin = now;
     await user.save();
 
     logger.info(`✅ User logged in: ${user.email}`);

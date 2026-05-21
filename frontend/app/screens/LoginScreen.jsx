@@ -96,7 +96,7 @@ export default function LoginScreen() {
 
           setTimeout(() => {
             switchTab('login');
-            showToast('Password reset link sent! ✉️', 'success');
+            showToast('Password reset link sent!', 'success', 3000, <Ionicons name="mail-outline" size={20} color="#10B981" />);
           }, 2000);
         } else {
           const errMsg = useAuthStore.getState().error || 'Failed to send reset email';
@@ -129,7 +129,7 @@ export default function LoginScreen() {
         if (result) {
           setStep(2);
           setCountdown(30);
-          showToast('Verification code sent to your email! ✉️', 'success');
+          showToast('Verification code sent to your email!', 'success', 3000, <Ionicons name="mail-outline" size={20} color="#10B981" />);
         } else {
           const errMsg = useAuthStore.getState().error || 'Failed to register. Please try again.';
           showToast(errMsg, 'error');
@@ -186,7 +186,7 @@ export default function LoginScreen() {
     setCountdown(30);
     const result = await startSignup(name.trim(), email.trim());
     if (result) {
-      showToast('A new verification code has been sent! ✉️', 'success');
+      showToast('A new verification code has been sent!', 'success', 3000, <Ionicons name="mail-unread-outline" size={20} color="#10B981" />);
     } else {
       const errMsg = useAuthStore.getState().error || 'Failed to resend OTP.';
       showToast(errMsg, 'error');

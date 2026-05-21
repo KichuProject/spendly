@@ -10,6 +10,7 @@ import EmptyState from '../components/EmptyState';
 import AddFriendSheet from '../components/AddFriendSheet';
 import FAB from '../components/FAB';
 import { useToast } from '../components/ToastNotification';
+import { Ionicons } from '@expo/vector-icons';
 import useExpenseStore from '../state/useExpenseStore';
 import useFriendsStore from '../state/useFriendsStore';
 import useFilterStore from '../state/useFilterStore';
@@ -58,7 +59,7 @@ export default function FriendsScreen({ navigation }) {
 
   const handleAddFriend = (name) => {
     addFriend(name);
-    showToast('Friend added! 👥', 'success');
+    showToast('Friend added!', 'success', 3000, <Ionicons name="person-add-outline" size={20} color="#10B981" />);
   };
 
   const netColor = totals.net > 0 ? COLORS.positive : totals.net < 0 ? COLORS.negative : COLORS.textMuted;

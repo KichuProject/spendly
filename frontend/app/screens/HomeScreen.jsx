@@ -13,6 +13,8 @@ import AddExpenseSheet from '../components/AddExpenseSheet';
 import DateRangePicker from '../components/DateRangePicker';
 import EmptyState from '../components/EmptyState';
 import { useToast } from '../components/ToastNotification';
+import { Ionicons } from '@expo/vector-icons';
+import AnimatedStreakFlame from '../components/AnimatedStreakFlame';
 import useExpenseStore from '../state/useExpenseStore';
 import useFriendsStore from '../state/useFriendsStore';
 import useAuthStore from '../state/useAuthStore';
@@ -70,6 +72,7 @@ export default function HomeScreen({ navigation, route }) {
 
   useEffect(() => {
     Animated.timing(counterAnim, { toValue: 1, duration: 800, useNativeDriver: true }).start();
+    useAuthStore.getState().initialize();
   }, []);
 
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function HomeScreen({ navigation, route }) {
   const handleSaveExpense = (expense) => {
     if (expense.id) updateExpense(expense.id, expense);
     else addExpense(expense);
-    showToast('Expense saved! 💰', 'success');
+    showToast('Expense saved!', 'success', 3000, <Ionicons name="cash-outline" size={20} color="#10B981" />);
   };
 
   const greeting = user?.name ? user.name.split(' ')[0] : 'there';
@@ -156,17 +159,25 @@ export default function HomeScreen({ navigation, route }) {
             </View>
             <Text style={styles.greeting}>Hey, {greeting} 👋</Text>
           </View>
-          <Pressable 
-            onPress={() => navigation.navigate('Notifications')}
-            style={[styles.bellWrap, WEB_STYLES.cursor]}
-          >
-            <Text style={styles.bell}>🔔</Text>
-            {incompleteDays.length > 0 && (
-              <View style={styles.bellBadge}>
-                <Text style={styles.bellBadgeText}>{incompleteDays.length}</Text>
+          <View style={styles.topRight}>
+            {user?.loginStreak !== undefined && user?.loginStreak > 0 && (
+              <View style={styles.streakContainer}>
+                <AnimatedStreakFlame size={38} />
+                <Text style={styles.streakText}>{user.loginStreak}</Text>
               </View>
             )}
-          </Pressable>
+            <Pressable 
+              onPress={() => navigation.navigate('Notifications')}
+              style={[styles.bellWrap, WEB_STYLES.cursor]}
+            >
+              <Text style={styles.bell}>🔔</Text>
+              {incompleteDays.length > 0 && (
+                <View style={styles.bellBadge}>
+                  <Text style={styles.bellBadgeText}>{incompleteDays.length}</Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
 
         <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -235,6 +246,26 @@ const styles = StyleSheet.create({
   container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 16 },
   topLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  streakContainer: { 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    width: 38,
+    height: 38,
+    position: 'relative',
+  },
+  streakText: { 
+    position: 'absolute',
+    bottom: -14,
+    color: '#EF4444', 
+    fontSize: 11, 
+    fontWeight: '900',
+    textAlign: 'center',
+    textShadowColor: 'rgba(239, 68, 68, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    width: 60,
+  },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(124,58,237,0.25)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.4)', alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '700' },
   greeting: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700' },

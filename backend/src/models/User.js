@@ -84,12 +84,12 @@ const userSchema = new mongoose.Schema(
     // Metadata
     lastLogin: {
       type: Date,
-      default: null,
+      default: Date.now,
     },
 
     loginStreak: {
       type: Number,
-      default: 0,
+      default: 1,
     },
 
     // Password field (for accounts with password)
@@ -145,6 +145,22 @@ userSchema.index({ expoPushToken: 1 });
  * Get user data without sensitive info
  */
 userSchema.methods.toPublicJSON = function () {
+  let currentStreak = this.loginStreak || 0;
+  if (this.lastLogin) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const lastDate = new Date(this.lastLogin.getFullYear(), this.lastLogin.getMonth(), this.lastLogin.getDate());
+    const diffTime = today - lastDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    // If they missed yesterday, the streak is broken (shows 0 until they log in today)
+    if (diffDays > 1) {
+      currentStreak = 0;
+    }
+  } else {
+    currentStreak = 0;
+  }
+
   return {
     _id: this._id,
     email: this.email,
@@ -154,6 +170,7 @@ userSchema.methods.toPublicJSON = function () {
     isEmailVerified: this.isEmailVerified,
     isActive: this.isActive,
     lastLogin: this.lastLogin,
+    loginStreak: currentStreak,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
     deletedNotifications: this.deletedNotifications || [],
