@@ -219,7 +219,7 @@ export default function BottomAssistant({ visible, onClose }) {
       }
     } catch (error) {
       console.error('AI Chat Error:', error);
-      alert('Failed to connect to AI');
+      alert(error.message || 'Failed to connect to AI');
     } finally {
       setIsProcessing(false);
       setText('');

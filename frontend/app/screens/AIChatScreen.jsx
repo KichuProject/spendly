@@ -182,7 +182,7 @@ export default function AIChatScreen({ navigation }) {
         showToast(data.message || 'Error parsing transaction', 'error');
       }
     } catch (error) {
-      showToast('Network error while connecting to AI', 'error');
+      showToast(error.message || 'Network error while connecting to AI', 'error');
     } finally {
       setLoading(false);
     }
