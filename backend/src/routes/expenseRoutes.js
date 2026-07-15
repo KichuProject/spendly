@@ -8,6 +8,7 @@ const router = express.Router();
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const {
   createExpense,
+  createBulkExpenses,
   getExpenses,
   getExpense,
   updateExpense,
@@ -28,6 +29,12 @@ router.use(authMiddleware);
  * Create expense with timestamps
  */
 router.post('/', createExpense);
+
+/**
+ * POST /api/expenses/bulk
+ * Create multiple expenses in bulk
+ */
+router.post('/bulk', createBulkExpenses);
 
 /**
  * GET /api/expenses

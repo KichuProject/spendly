@@ -190,6 +190,18 @@ const useExpenseStore = create(
       },
 
       /**
+       * Add expenses to local store directly (for voice bulk insert)
+       */
+      addExpensesLocally: (newExpenses) => {
+        set((state) => {
+          const normalized = normalizeExpenses(newExpenses);
+          return {
+            expenses: [...normalized, ...state.expenses],
+          };
+        });
+      },
+
+      /**
        * Delete expense
        */
       deleteExpense: async (id) => {

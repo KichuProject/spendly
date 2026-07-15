@@ -257,7 +257,7 @@ class APIClient {
   async registerPushToken(token) {
     return this.request('/users/register-push-token', {
       method: 'POST',
-      body: JSON.stringify({ expoPushToken: token }),
+      body: JSON.stringify({ token, expoPushToken: token }),
     });
   }
 

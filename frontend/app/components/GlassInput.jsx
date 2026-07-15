@@ -70,7 +70,7 @@ export default function GlassInput({
           error && styles.errorContainer,
         ]}
       >
-        {icon && (
+        {icon ? (
           typeof icon === 'string' && ['👤', '✉️', '🔑', '🔒', '🔐', '🔍', '📱'].includes(icon) ? (
             <Ionicons
               name={
@@ -105,8 +105,8 @@ export default function GlassInput({
           ) : (
             icon
           )
-        )}
-        {prefix && <Text style={[styles.prefix, large && styles.prefixLarge]}>{prefix}</Text>}
+        ) : null}
+        {prefix ? <Text style={[styles.prefix, large && styles.prefixLarge]}>{prefix}</Text> : null}
         <TextInput
           style={[
             styles.input,
@@ -140,9 +140,9 @@ export default function GlassInput({
           </Pressable>
         )}
       </Animated.View>
-      {error && typeof error === 'string' && (
+      {error && typeof error === 'string' ? (
         <Text style={styles.errorText}>{error}</Text>
-      )}
+      ) : null}
     </View>
   );
 }

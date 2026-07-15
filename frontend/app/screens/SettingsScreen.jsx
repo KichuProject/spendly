@@ -42,10 +42,23 @@ export default function SettingsScreen() {
       const isGranted = await checkNotificationPermissions();
       setNotifEnabled(isGranted);
       
-      if (isGranted) {
-        await AsyncStorage.setItem('USER_NOTIF_PREF', 'enabled');
-      } else {
-        await AsyncStorage.setItem('USER_NOTIF_PREF', 'disabled');
+      try {
+        const { apiClient } = require('../utils/apiClient');
+        if (isGranted) {
+          await AsyncStorage.setItem('USER_NOTIF_PREF', 'enabled');
+          await apiClient.enableNotifications();
+          
+          const { registerForPushNotificationsAsync } = require('../utils/notificationService');
+          const token = await registerForPushNotificationsAsync();
+          if (token) {
+            await useAuthStore.getState().registerPushToken(token);
+          }
+        } else {
+          await AsyncStorage.setItem('USER_NOTIF_PREF', 'disabled');
+          await apiClient.disableNotifications();
+        }
+      } catch (err) {
+        console.log("Error syncing notification permissions with backend:", err);
       }
     }
 
@@ -72,6 +85,18 @@ export default function SettingsScreen() {
         setNotifEnabled(true);
         showToast('Notifications enabled!', 'success', 3000, <Ionicons name="sparkles-outline" size={20} color="#10B981" />);
         
+        try {
+          const { apiClient } = require('../utils/apiClient');
+          await apiClient.enableNotifications();
+          const { registerForPushNotificationsAsync } = require('../utils/notificationService');
+          const token = await registerForPushNotificationsAsync();
+          if (token) {
+            await useAuthStore.getState().registerPushToken(token);
+          }
+        } catch (apiErr) {
+          console.log("❌ Failed to enable notifications on backend:", apiErr);
+        }
+
         // Schedule if today is incomplete
         const todayKey = toDateKey(new Date());
         const isTodayComplete = dayCompletions[todayKey] === true;

@@ -28,6 +28,7 @@ import FriendDetailScreen from './app/screens/FriendDetailScreen';
 import StatsScreen from './app/screens/StatsScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import NotificationsScreen from './app/screens/NotificationsScreen';
+import AIChatScreen from './app/screens/AIChatScreen';
 
 import useAuthStore from './app/state/useAuthStore';
 import useExpenseStore from './app/state/useExpenseStore';
@@ -77,6 +78,25 @@ function MainTabs() {
       <Tab.Screen name="Stats" component={StatsScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
+  );
+}
+
+const RootStack = createStackNavigator();
+function AuthRootStack() {
+  return (
+    <RootStack.Navigator 
+      screenOptions={{ 
+        headerShown: false,
+        cardStyle: { flex: 1, height: Platform.OS === 'web' ? '100%' : undefined }
+      }}
+    >
+      <RootStack.Screen name="MainTabs" component={MainTabs} />
+      <RootStack.Screen 
+        name="AIChatScreen" 
+        component={AIChatScreen} 
+        options={{ animationEnabled: true }}
+      />
+    </RootStack.Navigator>
   );
 }
 
@@ -223,6 +243,18 @@ export default function App() {
         useExpenseStore.getState().loadExpenses();
         useExpenseStore.getState().loadDayCompletions();
         useFriendsStore.getState().loadFriends();
+
+        // Register push token with the backend database
+        try {
+          const { registerForPushNotificationsAsync } = require('./app/utils/notificationService');
+          const token = await registerForPushNotificationsAsync();
+          if (token) {
+            await useAuthStore.getState().registerPushToken(token);
+            console.log("🎫 Registered push token with backend successfully");
+          }
+        } catch (pushErr) {
+          console.log("❌ Error registering push token with backend:", pushErr);
+        }
       }
     }
     syncData();
@@ -238,7 +270,7 @@ export default function App() {
         <ToastProvider>
           <NavigationContainer ref={navigationRef}>
             <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
-            {isAuthenticated ? <MainTabs /> : <LoginScreen />}
+            {isAuthenticated ? <AuthRootStack /> : <LoginScreen />}
           </NavigationContainer>
           <VersionUpdateModal 
             visible={updateModalVisible} 

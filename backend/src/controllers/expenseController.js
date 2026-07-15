@@ -78,6 +78,89 @@ exports.createExpense = async (req, res) => {
 };
 
 /**
+ * Create multiple expenses in bulk
+ */
+exports.createBulkExpenses = async (req, res) => {
+  try {
+    const { expenses } = req.body;
+    const userId = req.user.id;
+
+    if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'An array of expenses is required',
+      });
+    }
+
+    const processedExpenses = [];
+    const dateKeysToUpdate = new Map(); // using Map to keep unique date objects
+
+    for (const item of expenses) {
+      const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod } = item;
+
+      if (!amount || !reason || !date) {
+        return res.status(400).json({
+          success: false,
+          message: 'Amount, reason, and date are required for all expenses',
+        });
+      }
+
+      const expenseDate = parseDateSafely(date);
+      const dateKey = toDateKey(expenseDate);
+      dateKeysToUpdate.set(dateKey, expenseDate);
+
+      let processedSplits = [];
+      if ((type === 'split' || type === 'friend') && splits && splits.length > 0) {
+        processedSplits = splits.map((split) => ({
+          friendId: split.friendId,
+          friendName: split.friendName,
+          amount: split.amount,
+          direction: split.direction,
+          paid: split.paid || false,
+        }));
+      }
+
+      processedExpenses.push({
+        userId,
+        amount,
+        reason,
+        category: category || 'Other',
+        emoji: emoji || '💰',
+        date: expenseDate,
+        dateKey,
+        type: type || 'solo',
+        splits: processedSplits,
+        notes: notes || null,
+        tags: tags || [],
+        paymentMethod: paymentMethod || 'cash',
+      });
+    }
+
+    const savedExpenses = await Expense.insertMany(processedExpenses);
+
+    // Update DayCompletion for all unique dates in the bulk insert
+    for (const [dateKey, date] of dateKeysToUpdate.entries()) {
+      await DayCompletion.findOrCreateDay(userId, dateKey, date);
+    }
+
+    logger.info(`Bulk expenses created: ${savedExpenses.length} for user ${userId}`);
+
+    res.status(201).json({
+      success: true,
+      data: savedExpenses,
+      count: savedExpenses.length,
+      message: `${savedExpenses.length} expenses created successfully`,
+    });
+  } catch (error) {
+    logger.error(`Error creating bulk expenses: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
  * Get all expenses with filters
  */
 exports.getExpenses = async (req, res) => {

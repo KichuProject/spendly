@@ -14,7 +14,7 @@ const logger = require('../utils/logger');
 const handleRegisterPushToken = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { token } = req.body;
+    const token = req.body.token || req.body.expoPushToken;
 
     if (!userId) {
       return res.status(401).json({

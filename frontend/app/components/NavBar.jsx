@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { View, Pressable, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, SHADOWS, SPACING, WEB_STYLES } from '../styles/theme';
 import CategoryIcon from './CategoryIcon';
 
@@ -20,16 +21,44 @@ export default function NavBar({ state, navigation }) {
         {TABS.map((tab, index) => {
           const isActive = state.index === index;
           return (
-            <TabItem
-              key={tab.key}
-              tab={tab}
-              isActive={isActive}
-              onPress={() => navigation.navigate(tab.key)}
-            />
+            <React.Fragment key={tab.key}>
+              <TabItem
+                tab={tab}
+                isActive={isActive}
+                onPress={() => navigation.navigate(tab.key)}
+              />
+              
+              {index === 1 && (
+                <AIChatButton onPress={() => navigation.navigate('AIChatScreen')} />
+              )}
+            </React.Fragment>
           );
         })}
       </View>
     </View>
+  );
+}
+
+function AIChatButton({ onPress }) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  return (
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, styles.aiButtonWrapper]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.88, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+        onPressOut={() => Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 300, friction: 10 }).start()}
+        style={[styles.aiButton, WEB_STYLES.cursor, WEB_STYLES.noSelect]}
+      >
+        <LinearGradient
+          colors={GRADIENTS.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <MaterialCommunityIcons name="robot-outline" size={24} color="#FFFFFF" />
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -45,7 +74,13 @@ function TabItem({ tab, isActive, onPress }) {
   };
 
   return (
-    <Animated.View style={[styles.tabWrapper, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View style={[
+      styles.tabWrapper, 
+      { 
+        transform: [{ scale: scaleAnim }],
+        flex: isActive ? 1.6 : 1 // Dynamically allocate more space to the active tab!
+      }
+    ]}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -67,7 +102,16 @@ function TabItem({ tab, isActive, onPress }) {
           disableOverride
           style={[styles.tabIcon, isActive && styles.tabIconActive]}
         />
-        {isActive && <Text style={styles.tabLabel}>{tab.label}</Text>}
+        {isActive && (
+          <Text 
+            style={styles.tabLabel}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
+          >
+            {tab.label}
+          </Text>
+        )}
       </Pressable>
     </Animated.View>
   );
@@ -102,16 +146,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15,12,41,0.85)',
   },
   tabWrapper: {
-    flex: 1,
+    // Flex is set dynamically in the component
   },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4, // Reduced horizontal padding to prevent crowding
     borderRadius: 20,
-    gap: 6,
+    gap: 4, // Reduced gap from 6
     overflow: 'hidden',
   },
   tabActive: {
@@ -127,7 +171,21 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: COLORS.textPrimary,
-    fontSize: 12,
+    fontSize: 11, // Slightly smaller font size
     fontWeight: '700',
   },
+  aiButtonWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+  },
+  aiButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    ...SHADOWS.medium,
+  }
 });

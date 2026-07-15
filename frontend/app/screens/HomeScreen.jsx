@@ -7,7 +7,8 @@ import GlassCard from '../components/GlassCard';
 import SummaryCard from '../components/SummaryCard';
 import FilterBar from '../components/FilterBar';
 import DayCard from '../components/DayCard';
-import FAB from '../components/FAB';
+import FloatingMenu from '../components/FloatingMenu';
+import BottomAssistant from '../components/BottomAssistant';
 import CategoryIcon from '../components/CategoryIcon';
 import AddExpenseSheet from '../components/AddExpenseSheet';
 import DateRangePicker from '../components/DateRangePicker';
@@ -50,6 +51,7 @@ export default function HomeScreen({ navigation, route }) {
 
   const { homeFilter, homeCustomRange, setHomeFilter, setHomeCustomRange } = useFilterStore();
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const showToast = useToast();
@@ -234,8 +236,12 @@ export default function HomeScreen({ navigation, route }) {
           <View style={{ height: 120 }} />
         </ScrollView>
 
-        <FAB onPress={() => setShowAddSheet(true)} />
+        <FloatingMenu 
+          onManualAdd={() => setShowAddSheet(true)} 
+          onAiAdd={() => setShowAiAssistant(true)} 
+        />
         <AddExpenseSheet visible={showAddSheet} onClose={() => setShowAddSheet(false)} onSave={handleSaveExpense} />
+        <BottomAssistant visible={showAiAssistant} onClose={() => setShowAiAssistant(false)} />
         <DateRangePicker visible={showDatePicker} onClose={() => setShowDatePicker(false)} onSelect={(range) => setHomeCustomRange(range)} installDate={installDate} />
       </View>
     </LiquidBackground>
@@ -261,9 +267,14 @@ const styles = StyleSheet.create({
     fontSize: 11, 
     fontWeight: '900',
     textAlign: 'center',
-    textShadowColor: 'rgba(239, 68, 68, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+    ...Platform.select({
+      web: { textShadow: '0px 1px 3px rgba(239, 68, 68, 0.4)' },
+      default: {
+        textShadowColor: 'rgba(239, 68, 68, 0.4)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
+      }
+    }),
     width: 60,
   },
   avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(124,58,237,0.25)', borderWidth: 1.5, borderColor: 'rgba(124,58,237,0.4)', alignItems: 'center', justifyContent: 'center' },

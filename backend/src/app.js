@@ -21,6 +21,7 @@ const dayRoutes = require('./routes/dayRoutes');
 const userRoutes = require('./routes/userRoutes');
 const testRoutes = require('./routes/testRoutes');
 const versionRoutes = require('./routes/versionRoutes');
+const voiceRoutes = require('./routes/voiceRoutes');
 
 const app = express();
 
@@ -109,6 +110,7 @@ app.use('/api/friends', friendRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/days', dayRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/voice', voiceRoutes);
 // Only enable seed/test endpoints in development environments
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/test', testRoutes);
@@ -128,6 +130,7 @@ app.get('/api', (req, res) => {
       analytics: '/api/analytics',
       days: '/api/days',
       users: '/api/users',
+      voice: '/api/voice',
     },
   });
 });

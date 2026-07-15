@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet, Pressable } from 'react-native';
+import { View, Animated, StyleSheet, Pressable, Platform } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 
@@ -301,11 +301,16 @@ const styles = StyleSheet.create({
   glowBg: {
     position: 'absolute',
     backgroundColor: 'rgba(239, 68, 68, 0.4)',
-    shadowColor: '#EF4444',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 15,
-    elevation: 10,
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 15px rgba(239, 68, 68, 0.8)' },
+      default: {
+        shadowColor: '#EF4444',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 15,
+        elevation: 10,
+      }
+    }),
   },
   ember: {
     position: 'absolute',
@@ -313,10 +318,15 @@ const styles = StyleSheet.create({
     height: 3.5,
     borderRadius: 1.75,
     backgroundColor: '#FDE047',
-    shadowColor: '#EAB308',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 3,
+    ...Platform.select({
+      web: { boxShadow: '0px 0px 2px rgba(234, 179, 8, 1)' },
+      default: {
+        shadowColor: '#EAB308',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 1,
+        shadowRadius: 2,
+        elevation: 3,
+      }
+    }),
   },
 });

@@ -71,4 +71,43 @@ router.post('/spendreset-password', handleResetPassword);
  */
 router.post('/logout', authMiddleware, handleLogout);
 
+/**
+ * GET /api/auth/trigger-cron
+ * Secure public webhook to trigger notification cron tasks manually or externally
+ */
+router.get('/trigger-cron', async (req, res) => {
+  try {
+    const { sendNotificationsForTime } = require('../scheduler/cronJobs');
+    const secret = req.query.secret || req.headers['x-cron-secret'];
+    const expectedSecret = process.env.CRON_SECRET || 'spendly_cron_secret_2026';
+
+    if (secret !== expectedSecret) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
+
+    const time = req.query.time || '10PM';
+    if (time !== '10PM' && time !== '11PM') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid time parameter. Use 10PM or 11PM',
+      });
+    }
+
+    const stats = await sendNotificationsForTime(time);
+    return res.status(200).json({
+      success: true,
+      message: `${time} notification cron triggered successfully`,
+      stats,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
 module.exports = router;
