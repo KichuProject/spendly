@@ -234,7 +234,7 @@ export default function LoginScreen() {
             <View style={styles.branding}>
               <Animated.View style={{ transform: [{ translateY: logoTranslateY }] }}>
               <View style={[styles.logoCircle, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
-                <Image source={require('../../assets/diamond_glow.png')} style={styles.logoImage} />
+                <Image source={require('../../assets/diamond_glow.jpg')} style={styles.logoImage} />
               </View>
               </Animated.View>
               <ThemedText variant="hero" color="primary" style={styles.appName}>Spendly</ThemedText>
