@@ -3,6 +3,7 @@
     "name": "Spendly",
     "slug": "spendly",
     "version": "2.0.0",
+    "jsEngine": "hermes",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -20,7 +21,9 @@
       "ndkVersion": "26.3.11579264",
       "softwareKeyboardLayoutMode": "resize",
       "versionCode": 2,
-      "permissions": ["android.permission.RECORD_AUDIO"],
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0F0C29",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -35,7 +38,8 @@
           "microphonePermission": "Allow Spendly to access your microphone for voice commands.",
           "speechRecognitionPermission": "Allow Spendly to securely recognize your voice."
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "web": {
       "favicon": "./assets/favicon.png"

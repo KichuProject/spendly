@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { COLORS, GLASS, SPACING, SHADOWS, WEB_STYLES } from '../styles/theme';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import GlassButton from './GlassButton';
-import GlassInput from './GlassInput';
+import ThemedText from './common/ThemedText';
+import ThemedInput from './common/ThemedInput';
+import PrimaryButton from './buttons/PrimaryButton';
+import SecondaryButton from './buttons/SecondaryButton';
 import AutocompleteInput from './AutocompleteInput';
 import DateRangePicker from './DateRangePicker';
-import { formatDate, toDateKey } from '../utils/dateUtils';
+import { formatDate } from '../utils/dateUtils';
 import { formatCurrency, parseCurrency } from '../utils/currencyUtils';
 import { getCategoryInfo, getCategoryKeywords } from '../utils/categoryUtils';
 import { getInitials } from '../state/useFriendsStore';
 import useExpenseStore from '../state/useExpenseStore';
 import useFriendsStore from '../state/useFriendsStore';
 import CategoryIcon from './CategoryIcon';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES, COLORS } from '../styles/theme';
 
 export default function AddExpenseSheet({ visible, onClose, onSave, preselectedFriend, editExpense }) {
+  const { colors, radius } = useTheme();
   const pastReasons = useExpenseStore((s) => s.pastReasons);
   const friends = useFriendsStore((s) => s.friends);
   const addFriend = useFriendsStore((s) => s.addFriend);
@@ -31,6 +35,17 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
   const categoryInfo = getCategoryInfo(reason);
   const emoji = categoryInfo.emoji;
   const keywords = getCategoryKeywords(categoryInfo.name);
+  const emojiScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    emojiScale.setValue(0.5);
+    Animated.spring(emojiScale, {
+      toValue: 1,
+      damping: 12,
+      stiffness: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [emoji]);
 
   useEffect(() => {
     if (editExpense) {
@@ -181,24 +196,26 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
         behavior="padding"
       >
         <Pressable style={styles.dimArea} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.handle, { backgroundColor: colors.textMuted }]} />
           <View style={styles.header}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={styles.headerTitle}>
+              <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
                 {editExpense ? 'Edit Expense' : 'Add Expense'}
               </Text>
-              <Ionicons name={editExpense ? 'create-outline' : 'cash-outline'} size={20} color={editExpense ? '#38BDF8' : '#34D399'} />
+              <Ionicons name={editExpense ? 'create-outline' : 'cash-outline'} size={20} color={editExpense ? colors.primary : colors.success} />
             </View>
-            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={styles.close}>✕</Text></Pressable>
+            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={[styles.close, { color: colors.textMuted }]}>✕</Text></Pressable>
           </View>
           <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll} keyboardShouldPersistTaps="handled">
             {/* Reason */}
-            <Text style={styles.fieldLabel}>What was it for?</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>What was it for?</Text>
             <View style={styles.reasonRow}>
-              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-                <CategoryIcon emoji={emoji} size={22} color={categoryInfo.color} />
-              </View>
+               <Animated.View style={{ transform: [{ scale: emojiScale }] }}>
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surfaceSecondary, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }}>
+                  <CategoryIcon emoji={emoji} size={22} color={categoryInfo.color} />
+                </View>
+              </Animated.View>
               <AutocompleteInput
                 placeholder="e.g. Lunch, Uber, Groceries..."
                 value={reason}
@@ -210,58 +227,61 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
             </View>
 
             {/* Amount */}
-            <Text style={styles.fieldLabel}>How much?</Text>
-            <GlassInput
+            <View style={{ height: 12 }} />
+            <ThemedInput
+              label="How much?"
               placeholder="0.00"
               value={amount}
               onChangeText={setAmount}
-              prefix="₹"
-              large
+              icon={<ThemedText variant="body" color="secondary" style={{ fontSize: 18, marginRight: 4 }}>₹</ThemedText>}
               keyboardType="decimal-pad"
             />
 
             {/* Date */}
-            <Text style={styles.fieldLabel}>When?</Text>
-            <Pressable onPress={() => setShowDatePicker(true)} style={[styles.datePill, WEB_STYLES.cursor]}>
-              <Ionicons name="calendar-outline" size={16} color="#A78BFA" />
-              <Text style={styles.dateText}>{formatDate(date)}</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>When?</Text>
+            <Pressable onPress={() => setShowDatePicker(true)} style={[styles.datePill, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }, WEB_STYLES.cursor]}>
+              <Ionicons name="calendar-outline" size={16} color={colors.primary} />
+              <Text style={[styles.dateText, { color: colors.textPrimary }]}>{formatDate(date)}</Text>
             </Pressable>
 
             {/* Type toggle */}
-            <Text style={styles.fieldLabel}>Type</Text>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Type</Text>
             <View style={styles.typeRow}>
               <Pressable
                 onPress={() => setType('solo')}
                 style={[
                   styles.typeBtn,
-                  type === 'solo' && { borderColor: 'rgba(56, 189, 248, 0.5)', backgroundColor: 'rgba(56, 189, 248, 0.12)' },
+                  { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                  type === 'solo' && { borderColor: colors.primary, backgroundColor: colors.primaryLight },
                   WEB_STYLES.cursor
                 ]}
               >
-                <Ionicons name="person-outline" size={18} color={type === 'solo' ? '#38BDF8' : COLORS.textMuted} />
-                <Text style={[styles.typeText, type === 'solo' && { color: '#38BDF8' }]}>Solo</Text>
+                <Ionicons name="person-outline" size={18} color={type === 'solo' ? colors.primary : colors.textMuted} />
+                <Text style={[styles.typeText, { color: colors.textMuted }, type === 'solo' && { color: colors.primary }]}>Solo</Text>
               </Pressable>
               <Pressable
                 onPress={() => setType('split')}
                 style={[
                   styles.typeBtn,
-                  type === 'split' && { borderColor: 'rgba(192, 132, 252, 0.5)', backgroundColor: 'rgba(192, 132, 252, 0.12)' },
+                  { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                  type === 'split' && { borderColor: colors.accent, backgroundColor: colors.accentLight },
                   WEB_STYLES.cursor
                 ]}
               >
-                <Ionicons name="people-outline" size={18} color={type === 'split' ? '#C084FC' : COLORS.textMuted} />
-                <Text style={[styles.typeText, type === 'split' && { color: '#C084FC' }]}>Split</Text>
+                <Ionicons name="people-outline" size={18} color={type === 'split' ? colors.accent : colors.textMuted} />
+                <Text style={[styles.typeText, { color: colors.textMuted }, type === 'split' && { color: colors.accent }]}>Split</Text>
               </Pressable>
               <Pressable
                 onPress={() => setType('friend')}
                 style={[
                   styles.typeBtn,
-                  type === 'friend' && { borderColor: 'rgba(52, 211, 153, 0.5)', backgroundColor: 'rgba(52, 211, 153, 0.12)' },
+                  { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+                  type === 'friend' && { borderColor: colors.success, backgroundColor: colors.successLight },
                   WEB_STYLES.cursor
                 ]}
               >
-                <Ionicons name="person-add-outline" size={18} color={type === 'friend' ? '#34D399' : COLORS.textMuted} />
-                <Text style={[styles.typeText, type === 'friend' && { color: '#34D399' }]}>Friend</Text>
+                <Ionicons name="person-add-outline" size={18} color={type === 'friend' ? colors.success : colors.textMuted} />
+                <Text style={[styles.typeText, { color: colors.textMuted }, type === 'friend' && { color: colors.success }]}>Friend</Text>
               </Pressable>
             </View>
 
@@ -285,7 +305,7 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
                     }
                     setFriendSearch('');
                   }}
-                  icon="🔍"
+                  icon={<Ionicons name="search" size={18} color={colors.textSecondary} />}
                 />
                 {friendSearch.trim().length > 0 && !friends.find((f) => f.name.toLowerCase() === friendSearch.toLowerCase()) && (
                   <Pressable 
@@ -353,7 +373,7 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
                   onChangeText={setFriendSearch}
                   suggestions={friends.filter(f => !splits.some(s => s.friendId === f._id)).map((f) => f.name)}
                   onSelect={addSplitPerson}
-                  icon="🔍"
+                  icon={<Ionicons name="search" size={18} color={colors.textSecondary} />}
                 />
                 {friendSearch.trim().length > 0 && !friends.find((f) => f.name.toLowerCase() === friendSearch.toLowerCase()) && (
                   <Pressable onPress={() => addSplitPerson(friendSearch.trim())} style={[styles.addNewFriend, WEB_STYLES.cursor]}>
@@ -369,12 +389,12 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
                     <View style={styles.splitAmountWrap}>
                       <Text style={styles.splitPrefix}>₹</Text>
                       <TextInput
-                        style={styles.splitAmountInput}
+                        style={[styles.splitAmountInput, { color: colors.textPrimary }]}
                         value={split.amount > 0 ? String(split.amount) : ''}
                         onChangeText={(v) => updateSplitAmount(split.friendId, v)}
                         keyboardType="decimal-pad"
                         placeholder="0"
-                        placeholderTextColor={COLORS.textMuted}
+                        placeholderTextColor={colors.textMuted}
                       />
                     </View>
                     <Pressable onPress={() => removeSplitPerson(split.friendId)} style={[WEB_STYLES.cursor]}>
@@ -384,7 +404,7 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
                 ))}
                 {splits.length > 0 && (
                   <>
-                    <GlassButton title="🔀 Split Equally" variant="ghost" onPress={splitEqually} small />
+                    <SecondaryButton title="Split Equally" variant="primary" onPress={splitEqually} size="sm" icon={<Ionicons name="shuffle-outline" size={16} color={colors.primary} style={{ marginRight: 4 }} />} />
                     <View style={styles.totalCheck}>
                       <Text style={styles.totalLabel}>Total: {formatCurrency(totalAmount)}</Text>
                       <Text style={styles.totalLabel}>Friends: {formatCurrency(splitsTotal)}</Text>
@@ -399,10 +419,9 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
             <View style={{ height: 24 }} />
           </ScrollView>
 
-          <GlassButton
-            title={editExpense ? '💾 Update Expense' : '💾 Save Expense'}
+          <PrimaryButton
+            title={editExpense ? 'Update Expense' : 'Save Expense'}
             variant="success"
-            fullWidth
             onPress={handleSave}
             disabled={!canSave}
           />
@@ -416,25 +435,47 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: 'flex-end',
     ...Platform.select({
-      web: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
-      default: {},
+      web: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1000,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+      },
+      default: {
+        justifyContent: 'flex-end',
+      },
     }),
   },
   dimArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: 'rgba(20,16,50,0.98)',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     padding: 20,
     paddingBottom: 32,
     maxHeight: '85%',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
     borderBottomWidth: 0,
     ...Platform.select({
-      web: { maxWidth: 480, width: '100%', alignSelf: 'center' },
+      web: {
+        maxWidth: 520,
+        width: '90%',
+        alignSelf: 'center',
+        borderBottomLeftRadius: 28,
+        borderBottomRightRadius: 28,
+        borderBottomWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 10,
+      },
       default: {},
     }),
   },
@@ -447,11 +488,11 @@ const styles = StyleSheet.create({
   reasonRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   reasonEmoji: { fontSize: 28 },
   reasonInput: { flex: 1 },
-  datePill: { flexDirection: 'row', alignItems: 'center', gap: 8, ...GLASS.input, paddingHorizontal: 16, paddingVertical: 14 },
+  datePill: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14 },
   dateIcon: { fontSize: 16 },
   dateText: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '600' },
   typeRow: { flexDirection: 'row', gap: 12 },
-  typeBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, ...GLASS.input, paddingVertical: 16, borderRadius: 20 },
+  typeBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderRadius: 20, paddingVertical: 16 },
   typeBtnActive: { borderColor: COLORS.glassActiveBorder, backgroundColor: 'rgba(124,58,237,0.12)' },
   typeIcon: { fontSize: 20 },
   typeText: { color: COLORS.textMuted, fontSize: 15, fontWeight: '700' },
@@ -492,7 +533,7 @@ const styles = StyleSheet.create({
   categoryHintBadgeText: { fontSize: 11, fontWeight: '800' },
   categoryHintKeywords: { color: COLORS.textMuted, fontSize: 11, fontWeight: '500', fontStyle: 'italic', marginLeft: 19 },
   directionRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
-  directionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, ...GLASS.input, paddingVertical: 14, borderRadius: 16 },
+  directionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderRadius: 16, paddingVertical: 14 },
   directionIcon: { fontSize: 16 },
   directionText: { color: COLORS.textMuted, fontSize: 14, fontWeight: '700' },
 });

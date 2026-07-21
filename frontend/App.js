@@ -18,6 +18,7 @@ import {
 } from '@expo-google-fonts/inter';
 
 import { ToastProvider } from './app/components/ToastNotification';
+import { ThemeProvider } from './app/styles/ThemeContext';
 import NavBar from './app/components/NavBar';
 
 import LoginScreen from './app/screens/LoginScreen';
@@ -29,6 +30,7 @@ import StatsScreen from './app/screens/StatsScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import NotificationsScreen from './app/screens/NotificationsScreen';
 import AIChatScreen from './app/screens/AIChatScreen';
+import ExportExpensesScreen from './app/screens/ExportExpensesScreen';
 
 import useAuthStore from './app/state/useAuthStore';
 import useExpenseStore from './app/state/useExpenseStore';
@@ -94,6 +96,11 @@ function AuthRootStack() {
       <RootStack.Screen 
         name="AIChatScreen" 
         component={AIChatScreen} 
+        options={{ animationEnabled: true }}
+      />
+      <RootStack.Screen 
+        name="ExportExpenses" 
+        component={ExportExpensesScreen} 
         options={{ animationEnabled: true }}
       />
     </RootStack.Navigator>
@@ -266,21 +273,23 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider style={Platform.OS === 'web' ? { height: '100vh', width: '100vw', overflow: 'hidden' } : { flex: 1 }}>
-        <ToastProvider>
-          <NavigationContainer ref={navigationRef}>
-            <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
-            {isAuthenticated ? <AuthRootStack /> : <LoginScreen />}
-          </NavigationContainer>
-          <VersionUpdateModal 
-            visible={updateModalVisible} 
-            message={updateMessage} 
-            platform={updatePlatform} 
-            apkLink={updateApkLink}
-            onCancel={() => setUpdateModalVisible(false)} 
-          />
-        </ToastProvider>
-      </SafeAreaProvider>
+      <ThemeProvider>
+        <SafeAreaProvider style={Platform.OS === 'web' ? { height: '100vh', width: '100vw', overflow: 'hidden' } : { flex: 1 }}>
+          <ToastProvider>
+            <NavigationContainer ref={navigationRef}>
+              <StatusBar barStyle="light-content" backgroundColor="#0F0C29" translucent />
+              {isAuthenticated ? <AuthRootStack /> : <LoginScreen />}
+            </NavigationContainer>
+            <VersionUpdateModal 
+              visible={updateModalVisible} 
+              message={updateMessage} 
+              platform={updatePlatform} 
+              apkLink={updateApkLink}
+              onCancel={() => setUpdateModalVisible(false)} 
+            />
+          </ToastProvider>
+        </SafeAreaProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

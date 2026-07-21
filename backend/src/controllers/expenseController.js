@@ -13,7 +13,7 @@ const logger = require('../utils/logger');
  */
 exports.createExpense = async (req, res) => {
   try {
-    const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod } = req.body;
+    const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod, source, account, recurring, frequency, attachment } = req.body;
     const userId = req.user.id;
 
     // Validation
@@ -54,6 +54,11 @@ exports.createExpense = async (req, res) => {
       notes: notes || null,
       tags: tags || [],
       paymentMethod: paymentMethod || 'cash',
+      source: source || null,
+      account: account || 'Cash',
+      recurring: recurring || false,
+      frequency: frequency || null,
+      attachment: attachment || null,
     });
 
     await expense.save();
@@ -96,7 +101,7 @@ exports.createBulkExpenses = async (req, res) => {
     const dateKeysToUpdate = new Map(); // using Map to keep unique date objects
 
     for (const item of expenses) {
-      const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod } = item;
+      const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod, source, account, recurring, frequency, attachment } = item;
 
       if (!amount || !reason || !date) {
         return res.status(400).json({
@@ -133,6 +138,11 @@ exports.createBulkExpenses = async (req, res) => {
         notes: notes || null,
         tags: tags || [],
         paymentMethod: paymentMethod || 'cash',
+        source: source || null,
+        account: account || 'Cash',
+        recurring: recurring || false,
+        frequency: frequency || null,
+        attachment: attachment || null,
       });
     }
 
@@ -249,7 +259,7 @@ exports.updateExpense = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod } = req.body;
+    const { amount, reason, category, emoji, date, type, splits, notes, tags, paymentMethod, source, account, recurring, frequency, attachment } = req.body;
 
     const expense = await Expense.findOne({
       _id: id,
@@ -285,6 +295,11 @@ exports.updateExpense = async (req, res) => {
     if (notes !== undefined) expense.notes = notes;
     if (tags !== undefined) expense.tags = tags;
     if (paymentMethod !== undefined) expense.paymentMethod = paymentMethod;
+    if (source !== undefined) expense.source = source;
+    if (account !== undefined) expense.account = account;
+    if (recurring !== undefined) expense.recurring = recurring;
+    if (frequency !== undefined) expense.frequency = frequency;
+    if (attachment !== undefined) expense.attachment = attachment;
 
     await expense.save();
 

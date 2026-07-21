@@ -1,14 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import GlassCard from './GlassCard';
-import GlassButton from './GlassButton';
+import { View, StyleSheet } from 'react-native';
+import ThemedCard from './common/ThemedCard';
+import ThemedText from './common/ThemedText';
+import PrimaryButton from './buttons/PrimaryButton';
 import CategoryIcon from './CategoryIcon';
-import { COLORS, SPACING } from '../styles/theme';
+import { useTheme } from '../styles/ThemeContext';
+import ScaleIn from './animations/ScaleIn';
 
 export default function EmptyState({ emoji, icon, title, message, buttonTitle, onButtonPress, style }) {
+  const { colors, radius } = useTheme();
+
   return (
+    <ScaleIn delay={100}>
     <View style={[styles.wrapper, style]}>
-      <GlassCard style={styles.card}>
+      <ThemedCard style={styles.card} elevated>
         {icon ? (
           <View style={styles.iconContainer}>{icon}</View>
         ) : (
@@ -16,22 +21,23 @@ export default function EmptyState({ emoji, icon, title, message, buttonTitle, o
             <CategoryIcon emoji={emoji || '💸'} size={48} />
           </View>
         )}
-        <Text style={styles.title}>{title || 'Nothing here yet'}</Text>
-        <Text style={styles.message}>{message || 'Start adding items to see them here!'}</Text>
+        <ThemedText variant="h3" color="primary" style={styles.title}>{title || 'Nothing here yet'}</ThemedText>
+        <ThemedText variant="bodySmall" color="secondary" style={styles.message}>{message || 'Start adding items to see them here!'}</ThemedText>
         {buttonTitle && (
-          <GlassButton title={buttonTitle} onPress={onButtonPress} variant="primary" style={styles.button} />
+          <PrimaryButton title={buttonTitle} onPress={onButtonPress} style={styles.button} />
         )}
-      </GlassCard>
+      </ThemedCard>
     </View>
+    </ScaleIn>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { padding: 24, alignItems: 'center' },
+  wrapper: { padding: 24, alignItems: 'center', width: '100%' },
   card: { alignItems: 'center', padding: 32, width: '100%' },
   emoji: { fontSize: 48, marginBottom: 16 },
   iconContainer: { marginBottom: 16 },
-  title: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
-  message: { color: COLORS.textSecondary, fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: 20 },
-  button: { marginTop: 4 },
+  title: { marginBottom: 8, textAlign: 'center' },
+  message: { textAlign: 'center', lineHeight: 20, marginBottom: 20 },
+  button: { marginTop: 4, minWidth: 160 },
 });

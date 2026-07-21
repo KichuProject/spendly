@@ -6,7 +6,6 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useSpeechRecognitionEvent, ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
-import LiquidBackground from '../components/LiquidBackground';
 import MessageBubble from '../components/MessageBubble';
 import ConfirmationCard from '../components/ConfirmationCard';
 import { useToast } from '../components/ToastNotification';
@@ -14,6 +13,12 @@ import useChatStore from '../state/useChatStore';
 import useExpenseStore from '../state/useExpenseStore';
 import apiClient from '../utils/apiClient';
 import { COLORS, WEB_STYLES, SHADOWS } from '../styles/theme';
+import { getScreenPaddingTop } from '../utils/platformUtils';
+import ThemedView from '../components/common/ThemedView';
+import ThemedText from '../components/common/ThemedText';
+import { useTheme } from '../styles/ThemeContext';
+import ThinkingDots from '../components/animations/ThinkingDots';
+import ScaleIn from '../components/animations/ScaleIn';
 
 export default function AIChatScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -40,6 +45,8 @@ export default function AIChatScreen({ navigation }) {
 
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
+
+  const { colors, radius, spacing, elevation } = useTheme();
 
   useEffect(() => {
     const runRotation = () => {
@@ -195,7 +202,7 @@ export default function AIChatScreen({ navigation }) {
         body: JSON.stringify({ conversationId, transactions: pendingTransactions })
       });
       if (data.success) {
-        showToast('Expense added successfully', 'success', 3000, <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />);
+        showToast('Expense added successfully', 'success', 3000, <Ionicons name="checkmark-circle" size={20} color={colors.success} />);
         if (data.transactions && data.transactions.length > 0) {
           useExpenseStore.getState().addExpensesLocally(data.transactions);
         }
@@ -225,28 +232,79 @@ export default function AIChatScreen({ navigation }) {
   };
 
   return (
-    <LiquidBackground 
-      simplified={Platform.OS === 'web'} 
-      style={Platform.OS === 'web' ? { height: '100vh' } : { flex: 1 }}
-    >
-      <View style={[styles.container, { width: '100%' }]}>
-        <View style={[styles.header, { paddingTop: (insets.top || Constants.statusBarHeight || 24) + 10}]}>
-          <Pressable onPress={() => { navigation.navigate('MainTabs'); }} style={WEB_STYLES.cursor}>
-            <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
+    <ThemedView variant="bg" style={[styles.container, { paddingTop: getScreenPaddingTop(insets.top) }]}>
+      <View style={{ flex: 1, width: '100%' }}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => navigation.navigate('MainTabs')}
+            style={({ pressed }) => [
+              styles.backBtn,
+              { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+              pressed && { opacity: 0.7 },
+              WEB_STYLES.cursor,
+            ]}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
           </Pressable>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <MaterialCommunityIcons name="robot-outline" size={22} color={COLORS.textPrimary} />
-            <Text style={styles.headerTitle}>Spendly AI</Text>
+
+          <View style={[styles.avatar, { backgroundColor: `${colors.primary}15`, borderColor: colors.primary }]}>
+            <MaterialCommunityIcons name="robot" size={20} color={colors.primary} />
           </View>
-          <View style={{ width: 24 }} />
+
+          <ThemedText variant="h3" color="primary" style={styles.headerTitle}>Spendly AI</ThemedText>
+
+          <Pressable
+            onPress={() => {
+              resetChat();
+              showToast('Conversation reset', 'info');
+            }}
+            style={({ pressed }) => [
+              styles.actionBtn,
+              { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+              pressed && { opacity: 0.7 },
+              WEB_STYLES.cursor
+            ]}
+          >
+            <Ionicons name="refresh-outline" size={18} color={colors.textPrimary} />
+          </Pressable>
         </View>
 
         {messages.length === 0 ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-            <MaterialCommunityIcons name="robot-outline" size={48} color="rgba(255,255,255,0.2)" style={{ marginBottom: 16 }} />
-            <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, textAlign: 'center' }}>
+            <ScaleIn delay={200}>
+            <MaterialCommunityIcons name="robot-outline" size={48} color={colors.textMuted} style={{ marginBottom: 16 }} />
+            </ScaleIn>
+            <ThemedText variant="body" color="secondary" style={{ textAlign: 'center', marginBottom: 24 }}>
               What transactions would you like to add today?
-            </Text>
+            </ThemedText>
+
+            {/* Suggestion Chips */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center', paddingHorizontal: 20 }}>
+              {[
+                "Add lunch for ₹350",
+                "Show this week's spent",
+                "Who owes me?"
+              ].map((sug, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => setText(sug)}
+                  style={({ pressed }) => [
+                    {
+                      paddingHorizontal: 16,
+                      paddingVertical: 10,
+                      borderRadius: 20,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      backgroundColor: colors.surfaceSecondary,
+                      opacity: pressed ? 0.8 : 1,
+                    },
+                    WEB_STYLES.cursor
+                  ]}
+                >
+                  <ThemedText variant="caption" color="secondary" style={{ fontWeight: '600' }}>{sug}</ThemedText>
+                </Pressable>
+              ))}
+            </View>
           </View>
         ) : (
           <FlatList
@@ -262,81 +320,85 @@ export default function AIChatScreen({ navigation }) {
 
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator color={COLORS.textSecondary} size="small" />
-            <Text style={styles.loadingText}>Spendly AI is typing...</Text>
+            <ThinkingDots size={7} />
+            <ThemedText variant="caption" color="secondary">Spendly AI is thinking...</ThemedText>
           </View>
         )}
 
-        {confirmationCardVisible ? (
-          <View style={styles.bottomCardWrapper}>
-             <ConfirmationCard onConfirm={handleConfirm} onCancel={handleCancel} />
-          </View>
-        ) : (
-          <Animated.View style={[
-            styles.floatingContainer, 
-            { 
-              marginBottom: keyboardHeight > 0 
-                ? keyboardHeight + 15 
-                : Math.max(insets.bottom, 40),
-              transform: [{ translateY: floatAnim }]
-            }
-          ]}>
-            <View style={styles.rainbowBorderWrapper}>
-              <Animated.View style={[styles.rainbowGradient, { transform: [{ rotate: spin }] }]}>
-                <LinearGradient 
-                  colors={[
-                    '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
-                    '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
-                    '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
-                    '#FF0000'
-                  ]} 
-                  locations={[
-                    0, 0.042, 0.083, 0.125, 0.167, 0.208, 0.25, 0.292, 
-                    0.333, 0.375, 0.417, 0.458, 0.5, 0.542, 0.583, 0.625, 
-                    0.667, 0.708, 0.75, 0.792, 0.833, 0.875, 0.917, 0.958, 1
-                  ]}
-                  start={{x: 0, y: 0}} end={{x: 1, y: 1}}
-                  style={StyleSheet.absoluteFill} 
-                />
-              </Animated.View>
+        <Animated.View style={[
+          styles.floatingContainer, 
+          { 
+            marginBottom: keyboardHeight > 0 
+              ? keyboardHeight + 15 
+              : Math.max(insets.bottom, 40),
+            transform: [{ translateY: floatAnim }]
+          }
+        ]}>
+          <View style={styles.rainbowBorderWrapper}>
+            <Animated.View style={[styles.rainbowGradient, { transform: [{ rotate: spin }] }]}>
+              <LinearGradient 
+                colors={[
+                  '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
+                  '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
+                  '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF007F',
+                  '#FF0000'
+                ]} 
+                locations={[
+                  0, 0.042, 0.083, 0.125, 0.167, 0.208, 0.25, 0.292, 
+                  0.333, 0.375, 0.417, 0.458, 0.5, 0.542, 0.583, 0.625, 
+                  0.667, 0.708, 0.75, 0.792, 0.833, 0.875, 0.917, 0.958, 1
+                ]}
+                start={{x: 0, y: 0}} end={{x: 1, y: 1}}
+                style={StyleSheet.absoluteFill} 
+              />
+            </Animated.View>
 
-              <View style={styles.pillInputContainer}>
-                <View style={styles.pillIconLeft}>
-                  <MaterialCommunityIcons name="robot-outline" size={24} color={COLORS.textPrimary} />
-                </View>
-                <TextInput
-                  style={styles.pillTextInput}
-                  placeholder="Message AI..."
-                  placeholderTextColor="rgba(255,255,255,0.4)"
-                  value={text}
-                  onChangeText={setText}
-                  onSubmitEditing={handleSend}
-                />
-                <View style={styles.pillActionsRight}>
-                  <Pressable 
-                    style={[styles.micButtonSmall, isListening && styles.micListening, WEB_STYLES.cursor]} 
-                    onPress={toggleListening}
-                  >
-                    <Ionicons name="mic" size={22} color={COLORS.textPrimary} />
-                  </Pressable>
-                  <Pressable 
-                    style={[styles.sendButtonSmall, !text.trim() && styles.disabledSend, WEB_STYLES.cursor]} 
-                    onPress={handleSend}
-                    disabled={!text.trim()}
-                  >
-                    <Ionicons name="send" size={16} color={COLORS.textPrimary} style={{ marginLeft: 2 }} />
-                  </Pressable>
-                </View>
+            <View style={styles.pillInputContainer}>
+              <View style={styles.pillIconLeft}>
+                <MaterialCommunityIcons name="robot-outline" size={24} color={COLORS.textPrimary} />
+              </View>
+              <TextInput
+                style={styles.pillTextInput}
+                placeholder="Message AI..."
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                value={text}
+                onChangeText={setText}
+                onSubmitEditing={handleSend}
+              />
+              <View style={styles.pillActionsRight}>
+                <Pressable 
+                  style={[styles.micButtonSmall, isListening && styles.micListening, WEB_STYLES.cursor]} 
+                  onPress={toggleListening}
+                >
+                  <Ionicons name="mic" size={22} color={COLORS.textPrimary} />
+                </Pressable>
+                <Pressable 
+                  style={[styles.sendButtonSmall, !text.trim() && styles.disabledSend, WEB_STYLES.cursor]} 
+                  onPress={handleSend}
+                  disabled={!text.trim()}
+                >
+                  <Ionicons name="send" size={16} color={COLORS.textPrimary} style={{ marginLeft: 2 }} />
+                </Pressable>
               </View>
             </View>
-          </Animated.View>
-        )}
+          </View>
+        </Animated.View>
       </View>
-    </LiquidBackground>
+
+      <ConfirmationCard 
+        visible={confirmationCardVisible}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    height: Platform.OS === 'web' ? '100%' : undefined,
+  },
   container: {
     flex: 1,
     ...Platform.select({
@@ -346,17 +408,39 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(15, 12, 41, 0.8)',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+    gap: 10,
+    flexShrink: 0,
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
   },
   headerTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 18,
+    flex: 1,
     fontWeight: '700',
+    marginRight: 8,
+  },
+  actionBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chatList: {
     padding: 20,
@@ -413,6 +497,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     maxHeight: 120,
     textAlignVertical: 'center',
+    ...Platform.select({
+      web: { outlineStyle: 'none' },
+      default: {},
+    }),
   },
   pillActionsRight: {
     flexDirection: 'row',

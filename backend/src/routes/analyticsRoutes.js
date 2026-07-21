@@ -12,6 +12,7 @@ const {
   getFriendBalance,
   getTotalBalance,
   getSpendingTrends,
+  getIncomeAnalytics,
 } = require('../controllers/analyticsController');
 
 router.use(authMiddleware);
@@ -45,5 +46,11 @@ router.get('/total-balance', getTotalBalance);
  * Get spending trends
  */
 router.get('/trends', getSpendingTrends);
+
+/**
+ * GET /api/analytics/income
+ * Get income analytics (categories, accounts, sources, cash flow, net savings)
+ */
+router.get('/income', getIncomeAnalytics);
 
 module.exports = router;

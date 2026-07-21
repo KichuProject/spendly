@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../styles/theme';
+import { SHADOWS } from '../styles/theme';
+import { useTheme } from '../styles/ThemeContext';
 
 const ToastContext = createContext(null);
 
@@ -9,14 +10,10 @@ export function useToast() {
   return useContext(ToastContext);
 }
 
-const TOAST_COLORS = {
-  success: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.3)', iconName: 'checkmark-circle-outline', iconColor: '#10B981' },
-  error: { bg: 'rgba(244,63,94,0.15)', border: 'rgba(244,63,94,0.3)', iconName: 'close-circle-outline', iconColor: '#F43F5E' },
-  warning: { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)', iconName: 'warning-outline', iconColor: '#F59E0B' },
-  info: { bg: 'rgba(124,58,237,0.15)', border: 'rgba(124,58,237,0.3)', iconName: 'sparkles-outline', iconColor: '#A78BFA' },
-};
-
 export function ToastProvider({ children }) {
+  const theme = useTheme();
+  const colors = theme.colors;
+  const isDark = theme.mode === 'dark';
   const [toast, setToast] = useState(null);
   const translateY = useRef(new Animated.Value(100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -37,11 +34,56 @@ export function ToastProvider({ children }) {
     }, duration);
   }, [translateY, opacity]);
 
+  const getToastColors = () => {
+    if (!toast) return {};
+    switch (toast.type) {
+      case 'success':
+        return {
+          bg: isDark ? 'rgba(16,185,129,0.15)' : colors.successLight,
+          border: isDark ? 'rgba(16,185,129,0.3)' : colors.success,
+          iconName: 'checkmark-circle',
+          iconColor: colors.success
+        };
+      case 'error':
+        return {
+          bg: isDark ? 'rgba(244,63,94,0.15)' : colors.dangerLight,
+          border: isDark ? 'rgba(244,63,94,0.3)' : colors.danger,
+          iconName: 'close-circle',
+          iconColor: colors.danger
+        };
+      case 'warning':
+        return {
+          bg: isDark ? 'rgba(245,158,11,0.15)' : colors.warningLight,
+          border: isDark ? 'rgba(245,158,11,0.3)' : colors.warning,
+          iconName: 'warning',
+          iconColor: colors.warning
+        };
+      case 'info':
+      default:
+        return {
+          bg: isDark ? 'rgba(124,58,237,0.15)' : colors.accentLight,
+          border: isDark ? 'rgba(124,58,237,0.3)' : colors.accent,
+          iconName: 'sparkles',
+          iconColor: colors.accent
+        };
+    }
+  };
+
+  const toastStyle = getToastColors();
+
   return (
     <ToastContext.Provider value={showToast}>
       {children}
       {toast && (
-        <Animated.View style={[styles.toast, { backgroundColor: TOAST_COLORS[toast.type]?.bg, borderColor: TOAST_COLORS[toast.type]?.border, transform: [{ translateY }], opacity }]}>
+        <Animated.View style={[
+          styles.toast,
+          {
+            backgroundColor: toastStyle.bg,
+            borderColor: toastStyle.border,
+            transform: [{ translateY }],
+            opacity
+          }
+        ]}>
           {toast.icon ? (
             React.isValidElement(toast.icon) ? (
               toast.icon
@@ -50,12 +92,12 @@ export function ToastProvider({ children }) {
             )
           ) : (
             <Ionicons 
-              name={TOAST_COLORS[toast.type]?.iconName} 
+              name={toastStyle.iconName} 
               size={20} 
-              color={TOAST_COLORS[toast.type]?.iconColor} 
+              color={toastStyle.iconColor} 
             />
           )}
-          <Text style={styles.toastText}>{toast.message}</Text>
+          <Text style={[styles.toastText, { color: isDark ? '#FFFFFF' : '#171717' }]}>{toast.message}</Text>
         </Animated.View>
       )}
     </ToastContext.Provider>
@@ -92,5 +134,5 @@ const styles = StyleSheet.create({
     }),
   },
   toastEmojiIcon: { fontSize: 18 },
-  toastText: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '600', flex: 1 },
+  toastText: { fontSize: 14, fontWeight: '600', flex: 1 },
 });

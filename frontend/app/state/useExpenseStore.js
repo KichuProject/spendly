@@ -144,6 +144,11 @@ const useExpenseStore = create(
             splits: expense.splits || [],
             notes: expense.notes || null,
             paymentMethod: expense.paymentMethod || 'cash',
+            source: expense.source || null,
+            account: expense.account || 'Cash',
+            recurring: expense.recurring || false,
+            frequency: expense.frequency || null,
+            attachment: expense.attachment || null,
           };
 
           const response = await apiClient.createExpense(expenseData);
@@ -161,7 +166,7 @@ const useExpenseStore = create(
             });
             return response.data;
           }
-          throw new Error(response.message || 'Failed to create expense');
+          throw new Error(response.message || 'Failed to create transaction');
         } catch (error) {
           set({ error: error.message, isLoading: false });
           throw error;
@@ -347,7 +352,7 @@ const useExpenseStore = create(
 
       getDayTotal: (date) => {
         return get().expenses
-          .filter((e) => isSameDay(e.date, date))
+          .filter((e) => isSameDay(e.date, date) && e.type !== 'income')
           .reduce((sum, e) => sum + e.amount, 0);
       },
 
@@ -370,7 +375,7 @@ const useExpenseStore = create(
         return get().expenses
           .filter((e) => {
             const t = parseDateSafely(e.date);
-            return t >= start && t <= end;
+            return t >= start && t <= end && e.type !== 'income';
           })
           .reduce((sum, e) => sum + e.amount, 0);
       },
@@ -383,7 +388,7 @@ const useExpenseStore = create(
         return get().expenses
           .filter((e) => {
             const t = parseDateSafely(e.date);
-            return t >= start && t <= end;
+            return t >= start && t <= end && e.type !== 'income';
           })
           .reduce((sum, e) => sum + e.amount, 0);
       },
@@ -429,9 +434,28 @@ const useExpenseStore = create(
           : get().expenses;
         const breakdown = {};
         filtered.forEach((e) => {
+          if (e.type === 'income') return;
           const cat = e.category || 'Other';
           if (!breakdown[cat]) {
             breakdown[cat] = { name: cat, emoji: e.emoji, color: getCategoryColorByName(cat), total: 0, count: 0 };
+          }
+          breakdown[cat].total += e.amount;
+          breakdown[cat].count += 1;
+        });
+        return Object.values(breakdown).sort((a, b) => b.total - a.total);
+      },
+
+      getIncomeCategoryBreakdown: (startDate, endDate) => {
+        const filtered = endDate
+          ? get().getExpensesByDateRange(startDate, endDate)
+          : get().expenses;
+        const breakdown = {};
+        filtered.forEach((e) => {
+          if (e.type !== 'income') return;
+          const cat = e.category || 'Other';
+          if (!breakdown[cat]) {
+            // Pick a green or predefined theme color if not found
+            breakdown[cat] = { name: cat, emoji: e.emoji, color: e.categoryColor || '#10B981', total: 0, count: 0 };
           }
           breakdown[cat].total += e.amount;
           breakdown[cat].count += 1;
@@ -443,7 +467,16 @@ const useExpenseStore = create(
         const filtered = endDate
           ? get().getExpensesByDateRange(startDate, endDate)
           : get().expenses;
-        return [...filtered].sort((a, b) => b.amount - a.amount).slice(0, limit);
+        const expensesOnly = filtered.filter((e) => e.type !== 'income');
+        return [...expensesOnly].sort((a, b) => b.amount - a.amount).slice(0, limit);
+      },
+
+      getTopIncomes: (limit = 5, startDate, endDate) => {
+        const filtered = endDate
+          ? get().getExpensesByDateRange(startDate, endDate)
+          : get().expenses;
+        const incomesOnly = filtered.filter((e) => e.type === 'income');
+        return [...incomesOnly].sort((a, b) => b.amount - a.amount).slice(0, limit);
       },
       notificationsList: [],
 

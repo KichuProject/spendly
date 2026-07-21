@@ -16,7 +16,7 @@ exports.getCategoryBreakdown = async (req, res) => {
     const userId = req.user.id;
     const { startDate, endDate, period = 'monthly' } = req.query;
 
-    let filter = { userId };
+    let filter = { userId, type: { $ne: 'income' } };
 
     if (startDate && endDate) {
       const start = getStartOfDay(parseDateSafely(startDate));
@@ -68,7 +68,7 @@ exports.getTopExpenses = async (req, res) => {
     const userId = req.user.id;
     const { limit = 10 } = req.query;
 
-    const topExpenses = await Expense.find({ userId })
+    const topExpenses = await Expense.find({ userId, type: { $ne: 'income' } })
       .sort({ amount: -1 })
       .limit(parseInt(limit))
       .lean();
@@ -233,6 +233,7 @@ exports.getSpendingTrends = async (req, res) => {
 
     const expenses = await Expense.find({
       userId,
+      type: { $ne: 'income' },
       date: { $gte: startDate },
     }).lean();
 
@@ -272,6 +273,127 @@ exports.getSpendingTrends = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error getting spending trends: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Get Income Analytics (categories, accounts, sources, cash flow, net savings)
+ */
+exports.getIncomeAnalytics = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { startDate, endDate } = req.query;
+
+    let filter = { userId };
+
+    if (startDate && endDate) {
+      const start = getStartOfDay(parseDateSafely(startDate));
+      const end = getEndOfDay(parseDateSafely(endDate));
+      filter.date = { $gte: start, $lte: end };
+    }
+
+    const allLogs = await Expense.find(filter).lean();
+
+    const incomes = allLogs.filter(e => e.type === 'income');
+    const expenses = allLogs.filter(e => e.type !== 'income');
+
+    // 1. Income Category Breakdown
+    const categoryBreakdown = {};
+    incomes.forEach((inc) => {
+      const cat = inc.category || 'Other';
+      if (!categoryBreakdown[cat]) {
+        categoryBreakdown[cat] = { total: 0, count: 0, emoji: inc.emoji };
+      }
+      categoryBreakdown[cat].total += inc.amount;
+      categoryBreakdown[cat].count += 1;
+    });
+
+    const categoryArray = Object.entries(categoryBreakdown)
+      .map(([category, data]) => ({
+        category,
+        ...data,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // 2. Account Distribution
+    const accountBreakdown = {};
+    incomes.forEach((inc) => {
+      const acc = inc.account || 'Cash';
+      if (!accountBreakdown[acc]) {
+        accountBreakdown[acc] = { total: 0, count: 0 };
+      }
+      accountBreakdown[acc].total += inc.amount;
+      accountBreakdown[acc].count += 1;
+    });
+
+    const accountArray = Object.entries(accountBreakdown)
+      .map(([account, data]) => ({
+        account,
+        ...data,
+      }));
+
+    // 3. Source Distribution
+    const sourceBreakdown = {};
+    incomes.forEach((inc) => {
+      const src = inc.source || 'Other';
+      if (!sourceBreakdown[src]) {
+        sourceBreakdown[src] = { total: 0, count: 0 };
+      }
+      sourceBreakdown[src].total += inc.amount;
+      sourceBreakdown[src].count += 1;
+    });
+
+    const sourceArray = Object.entries(sourceBreakdown)
+      .map(([source, data]) => ({
+        source,
+        ...data,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // 4. Net Savings & Cash Flow
+    const totalIncome = incomes.reduce((sum, e) => sum + e.amount, 0);
+    const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+    // 5. Cash Flow Trends
+    const cashFlowTrends = {};
+    allLogs.forEach((item) => {
+      const key = item.dateKey;
+      if (!cashFlowTrends[key]) {
+        cashFlowTrends[key] = { income: 0, expense: 0 };
+      }
+      if (item.type === 'income') {
+        cashFlowTrends[key].income += item.amount;
+      } else {
+        cashFlowTrends[key].expense += item.amount;
+      }
+    });
+
+    const trendArray = Object.entries(cashFlowTrends)
+      .map(([dateKey, data]) => ({
+        dateKey,
+        ...data,
+        net: data.income - data.expense,
+      }))
+      .sort((a, b) => a.dateKey.localeCompare(b.dateKey));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalIncome,
+        totalExpense,
+        netSavings: totalIncome - totalExpense,
+        categories: categoryArray,
+        accounts: accountArray,
+        sources: sourceArray,
+        cashFlowTrends: trendArray,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error getting income analytics: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message,

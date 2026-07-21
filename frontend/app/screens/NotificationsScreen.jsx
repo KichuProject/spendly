@@ -1,18 +1,127 @@
-import React from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, Platform } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, ScrollView, Pressable, StyleSheet, Platform, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import LiquidBackground from '../components/LiquidBackground';
-import GlassCard from '../components/GlassCard';
-import GlassButton from '../components/GlassButton';
+
+import ThemedView from '../components/common/ThemedView';
+import ThemedText from '../components/common/ThemedText';
+import ThemedCard from '../components/common/ThemedCard';
+import PrimaryButton from '../components/buttons/PrimaryButton';
+import SecondaryButton from '../components/buttons/SecondaryButton';
 import EmptyState from '../components/EmptyState';
+import FadeIn, { FadeInStagger } from '../components/animations/FadeIn';
+
 import useExpenseStore from '../state/useExpenseStore';
 import { formatDateLong, parseDateSafely } from '../utils/dateUtils';
-import { COLORS, WEB_STYLES } from '../styles/theme';
+import { useTheme } from '../styles/ThemeContext';
 import { getScreenPaddingTop } from '../utils/platformUtils';
+import { WEB_STYLES } from '../styles/theme';
+
+function NotificationRowItem({ n, colors, handleDelete, handleReviewDay }) {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const d = parseDateSafely(n.dateKey);
+  const formattedDate = formatDateLong(d);
+  const cardBorderColor = n.isSolved ? `${colors.success}30` : `${colors.accent}30`;
+  const cardBgColor = n.isSolved ? `${colors.success}05` : `${colors.accent}05`;
+
+  const triggerDelete = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      handleDelete(n.dateKey);
+    });
+  };
+
+  return (
+    <Animated.View style={{ opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}>
+      <ThemedCard
+        style={[styles.card, { borderColor: cardBorderColor, backgroundColor: cardBgColor }]}
+      >
+        <View style={styles.row}>
+          <View style={[
+            styles.iconContainer,
+            {
+              backgroundColor: n.isSolved ? `${colors.success}20` : `${colors.accent}20`,
+              borderColor: n.isSolved ? colors.success : colors.accent,
+            }
+          ]}>
+            <MaterialCommunityIcons
+              name={n.isSolved ? "checkbox-marked-circle-outline" : "party-popper"}
+              size={22}
+              color={n.isSolved ? colors.success : colors.accent}
+            />
+          </View>
+          <View style={styles.cardBody}>
+            <View style={styles.titleRow}>
+              <ThemedText variant="bodySmall" color="primary" style={{ fontWeight: '700', flex: 1, marginRight: 8 }}>
+                {n.isSolved ? "Day Logs Completed! 🎉" : "Incomplete Day Reminder"}
+              </ThemedText>
+              <View style={[styles.timeBadge, { backgroundColor: colors.borderLight }]}>
+                <Ionicons name="time-outline" size={11} color={colors.textMuted} />
+                <ThemedText variant="caption" color="secondary" style={styles.timeBadgeText}>10:00 PM</ThemedText>
+              </View>
+            </View>
+
+            <ThemedText variant="caption" color="secondary" style={{ lineHeight: 18 }}>
+              {n.isSolved
+                ? `You completed your logs for `
+                : `Your completion reminder arrived on `}
+              <ThemedText variant="caption" color="primary" style={{ fontWeight: '700' }}>{formattedDate}</ThemedText>.
+              {n.isSolved
+                ? " Great job maintaining your tracking habit!"
+                : " Please check your budget logs for this day to complete it."}
+            </ThemedText>
+          </View>
+
+          {/* Inline Delete Button */}
+          <Pressable
+            onPress={triggerDelete}
+            style={({ pressed }) => [
+              styles.deleteBtn,
+              pressed && { opacity: 0.7 },
+              WEB_STYLES.cursor
+            ]}
+          >
+            <Ionicons name="close-circle-outline" size={20} color={colors.textMuted} />
+          </Pressable>
+        </View>
+
+        <View style={[styles.actionsRow, { borderTopColor: colors.border }]}>
+          {n.isSolved ? (
+            <SecondaryButton
+              title="Review Completed Day"
+              icon={<Ionicons name="checkmark-circle-outline" size={16} color={colors.primary} style={{ marginRight: 6 }} />}
+              onPress={() => handleReviewDay(n.dateKey)}
+              size="sm"
+            />
+          ) : (
+            <PrimaryButton
+              title="Review & Complete Day"
+              icon={<Ionicons name="eye-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />}
+              onPress={() => handleReviewDay(n.dateKey)}
+              size="sm"
+            />
+          )}
+        </View>
+      </ThemedCard>
+    </Animated.View>
+  );
+}
 
 export default function NotificationsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { colors, radius, spacing } = useTheme();
   
   const notificationsList = useExpenseStore((s) => s.notificationsList) || [];
   const deleteNotification = useExpenseStore((s) => s.deleteNotification);
@@ -34,120 +143,73 @@ export default function NotificationsScreen({ navigation }) {
   };
 
   return (
-    <LiquidBackground>
-      <View style={[styles.container, { paddingTop: getScreenPaddingTop(insets.top) }]}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={[styles.backBtn, WEB_STYLES.cursor]}>
-            <Ionicons name="chevron-back" size={20} color={COLORS.textPrimary} />
+    <ThemedView variant="bg" style={[styles.container, { paddingTop: getScreenPaddingTop(insets.top) }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { backgroundColor: colors.surfaceSecondary, borderColor: colors.border },
+            pressed && { opacity: 0.7 },
+            WEB_STYLES.cursor,
+          ]}
+        >
+          <Ionicons name="chevron-back" size={20} color={colors.textPrimary} />
+        </Pressable>
+        <ThemedText variant="h1" color="primary" style={styles.pageTitle}>Notifications</ThemedText>
+        {visibleNotifications.length > 0 && (
+          <Pressable 
+            onPress={handleClearAll} 
+            style={({ pressed }) => [
+              styles.clearAllBtn,
+              { backgroundColor: colors.dangerLight, borderColor: colors.danger },
+              pressed && { opacity: 0.7 },
+              WEB_STYLES.cursor
+            ]}
+          >
+            <Ionicons name="trash-outline" size={15} color={colors.danger} />
+            <ThemedText variant="bodySmall" color="danger" style={styles.clearAllText}>Clear All</ThemedText>
           </Pressable>
-          <Text style={styles.pageTitle}>Notifications</Text>
-          {visibleNotifications.length > 0 && (
-            <Pressable 
-              onPress={handleClearAll} 
-              style={({ pressed }) => [
-                styles.clearAllBtn, 
-                pressed && { opacity: 0.7 },
-                WEB_STYLES.cursor
-              ]}
-            >
-              <Ionicons name="trash-outline" size={15} color="#FB7185" />
-              <Text style={styles.clearAllText}>Clear All</Text>
-            </Pressable>
-          )}
-        </View>
-
-        <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          {visibleNotifications.length > 0 ? (
-            visibleNotifications.map((n) => {
-              const d = parseDateSafely(n.dateKey);
-              const formattedDate = formatDateLong(d);
-              
-              return (
-                <GlassCard 
-                  key={n.dateKey} 
-                  style={[styles.card, n.isSolved && styles.solvedCard]} 
-                  glowColor={n.isSolved ? "rgba(16,185,129,0.15)" : "rgba(124,58,237,0.3)"}
-                >
-                  <View style={styles.row}>
-                    <View style={[styles.iconContainer, n.isSolved && styles.solvedIconContainer]}>
-                      <MaterialCommunityIcons 
-                        name={n.isSolved ? "checkbox-marked-circle-outline" : "party-popper"} 
-                        size={22} 
-                        color={n.isSolved ? "#10B981" : "#A78BFA"} 
-                      />
-                    </View>
-                    <View style={styles.cardBody}>
-                      <View style={styles.titleRow}>
-                        <Text style={styles.cardTitle}>
-                          {n.isSolved ? "Day Logs Completed! 🎉" : "Incomplete Day Reminder"}
-                        </Text>
-                        <View style={styles.timeBadge}>
-                          <Ionicons name="time-outline" size={11} color={COLORS.textMuted} />
-                          <Text style={styles.timeBadgeText}>10:00 PM</Text>
-                        </View>
-                      </View>
-                      
-                      <Text style={styles.cardText}>
-                        {n.isSolved 
-                          ? `You completed your logs for `
-                          : `Your completion reminder arrived on `}
-                        <Text style={styles.highlightText}>{formattedDate}</Text>.
-                        {n.isSolved 
-                          ? " Great job maintaining your tracking habit!"
-                          : " Please check your budget logs for this day to complete it."}
-                      </Text>
-                    </View>
-                    
-                    {/* Inline Delete Button */}
-                    <Pressable 
-                      onPress={() => handleDelete(n.dateKey)} 
-                      style={({ pressed }) => [
-                        styles.deleteBtn,
-                        pressed && { opacity: 0.7 },
-                        WEB_STYLES.cursor
-                      ]}
-                    >
-                      <Ionicons name="close-circle-outline" size={20} color="rgba(255, 255, 255, 0.4)" />
-                    </Pressable>
-                  </View>
-                  
-                  <View style={styles.actionsRow}>
-                    <GlassButton 
-                      title={n.isSolved ? "Review Completed Day" : "Review & Complete Day"} 
-                      icon={<Ionicons name={n.isSolved ? "checkmark-circle-outline" : "eye-outline"} size={16} color="#fff" />} 
-                      variant={n.isSolved ? "secondary" : "primary"} 
-                      fullWidth 
-                      small 
-                      onPress={() => handleReviewDay(n.dateKey)} 
-                    />
-                  </View>
-                </GlassCard>
-              );
-            })
-          ) : (
-            <View style={styles.emptyContainer}>
-              <EmptyState 
-                icon={<Ionicons name="checkmark-circle" size={54} color="#10B981" />}
-                title="All Caught Up!" 
-                message="No notifications at the moment. Keep tracking your daily expenses!"
-                buttonTitle="Go Back"
-                onButtonPress={() => navigation.goBack()}
-              />
-            </View>
-          )}
-          <View style={{ height: 120 }} />
-        </ScrollView>
+        )}
       </View>
-    </LiquidBackground>
+
+      <ScrollView style={{ flex: 1, minHeight: 0 }} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {visibleNotifications.length > 0 ? (
+          <FadeInStagger
+            items={visibleNotifications}
+            renderItem={(n) => (
+              <NotificationRowItem
+                key={n.dateKey}
+                n={n}
+                colors={colors}
+                handleDelete={handleDelete}
+                handleReviewDay={handleReviewDay}
+              />
+            )}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <EmptyState 
+              emoji="🔔"
+              title="All Caught Up!" 
+              message="No notifications at the moment. Keep tracking your daily expenses!"
+              buttonTitle="Go Back"
+              onButtonPress={() => navigation.goBack()}
+            />
+          </View>
+        )}
+        <View style={{ height: 120 }} />
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, maxWidth: 480, alignSelf: 'center', width: '100%', height: Platform.OS === 'web' ? '100%' : undefined },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, marginBottom: 16, gap: 12 },
-  backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
-  pageTitle: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800' },
+  backBtn: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  pageTitle: { fontSize: 24, fontWeight: '800' },
   clearAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,40 +218,26 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: 'rgba(251,113,133,0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(251,113,133,0.2)',
   },
   clearAllText: {
-    color: '#FB7185',
     fontSize: 13,
     fontWeight: '600',
   },
   scrollContent: { paddingHorizontal: 16 },
-  card: { padding: 16, marginBottom: 14, overflow: 'hidden' },
-  solvedCard: {
-    borderColor: 'rgba(16,185,129,0.2)',
-    backgroundColor: 'rgba(16,185,129,0.03)',
-  },
+  card: { marginBottom: 14 },
   row: { flexDirection: 'row', gap: 10 },
-  iconContainer: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(167,139,250,0.12)', borderWidth: 1, borderColor: 'rgba(167,139,250,0.3)', alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start' },
-  solvedIconContainer: {
-    backgroundColor: 'rgba(16,185,129,0.12)',
-    borderColor: 'rgba(16,185,129,0.3)',
-  },
+  iconContainer: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-start' },
   cardBody: { flex: 1 },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, marginRight: 4 },
-  cardTitle: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '700', flex: 1, marginRight: 8 },
-  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.06)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
-  timeBadgeText: { color: COLORS.textMuted, fontSize: 10, fontWeight: '600' },
-  cardText: { color: COLORS.textMuted, fontSize: 13, lineHeight: 18 },
-  highlightText: { color: COLORS.textPrimary, fontWeight: '700' },
+  timeBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
+  timeBadgeText: { fontSize: 10, fontWeight: '600' },
   deleteBtn: {
     padding: 4,
     alignSelf: 'flex-start',
     marginTop: -4,
     marginRight: -4,
   },
-  actionsRow: { marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' },
+  actionsRow: { marginTop: 14, paddingTop: 12, borderTopWidth: 1 },
   emptyContainer: { marginTop: 40 },
 });

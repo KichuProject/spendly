@@ -1,8 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Platform } from 'react-native';
-import { COLORS, GLASS, WEB_STYLES } from '../styles/theme';
+import { COLORS, WEB_STYLES } from '../styles/theme';
+import { useTheme } from '../styles/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AutocompleteInput({ placeholder, value, onChangeText, suggestions = [], onSelect, icon, style }) {
+  const { colors, radius } = useTheme();
   const [focused, setFocused] = useState(false);
   const selectingRef = useRef(false);
   
@@ -20,17 +23,17 @@ export default function AutocompleteInput({ placeholder, value, onChangeText, su
     setTimeout(() => {
       selectingRef.current = false;
       setFocused(false);
-    }, 0);
+    }, 100);
   };
 
   return (
     <View style={[styles.container, style]}>
       <View style={[styles.inputRow, focused && styles.inputFocused]}>
-        {icon && <Text style={styles.icon}>{icon}</Text>}
+        {icon && (typeof icon === 'string' ? <Text style={styles.icon}>{icon}</Text> : icon)}
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: colors.textPrimary }]}
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={colors.textMuted}
           value={value}
           onChangeText={(val) => {
             onChangeText(val);
@@ -38,24 +41,39 @@ export default function AutocompleteInput({ placeholder, value, onChangeText, su
           }}
           onFocus={() => setFocused(true)}
           onBlur={() => {
-            // Only blur if we're not selecting
-            if (!selectingRef.current) {
-              setFocused(false);
-            }
+            // Delay closing the dropdown to allow onPress to register
+            setTimeout(() => {
+              if (!selectingRef.current) {
+                setFocused(false);
+              }
+            }, 200);
           }}
           selectionColor={COLORS.primary}
         />
       </View>
       {showDropdown && (
-        <View style={styles.dropdown} pointerEvents="auto">
+        <View style={[styles.dropdown, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border, borderRadius: radius.md, pointerEvents: 'auto' }]}>
           {filtered.map((item, i) => (
             <Pressable
               key={i}
-              onPress={() => handleSuggestionPress(item)}
-              style={[styles.suggestion, WEB_STYLES.cursor]}
-              android_ripple={{ color: 'rgba(168,85,247,0.1)' }}
+              onPressIn={() => handleSuggestionPress(item)}
+              style={({ pressed }) => [
+                styles.suggestion,
+                {
+                  borderBottomColor: colors.borderLight,
+                  backgroundColor: pressed ? (colors.primary + '15') : 'transparent',
+                },
+                WEB_STYLES.cursor
+              ]}
+              android_ripple={{ color: colors.primary + '20' }}
             >
-              <Text style={styles.suggestionText}>{item}</Text>
+              <View style={styles.suggestionContent}>
+                <View style={styles.suggestionLeft}>
+                  <Ionicons name="time-outline" size={15} color={colors.textTertiary} style={styles.timeIcon} />
+                  <Text style={[styles.suggestionText, { color: colors.textPrimary }]}>{item}</Text>
+                </View>
+                <Ionicons name="arrow-up-back" size={15} color={colors.textMuted} style={styles.arrowIcon} />
+              </View>
             </Pressable>
           ))}
         </View>
@@ -67,9 +85,10 @@ export default function AutocompleteInput({ placeholder, value, onChangeText, su
 const styles = StyleSheet.create({
   container: { zIndex: 10 },
   inputRow: {
-    ...GLASS.input,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 16,
     paddingHorizontal: 14,
     gap: 8,
   },
@@ -87,21 +106,39 @@ const styles = StyleSheet.create({
     }),
   },
   dropdown: {
-    backgroundColor: 'rgba(30,25,60,0.95)',
-    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
     marginTop: 4,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
   },
   suggestion: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+  },
+  suggestionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  suggestionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeIcon: {
+    marginRight: 2,
+    opacity: 0.8,
+  },
+  arrowIcon: {
+    opacity: 0.5,
   },
   suggestionText: {
-    color: COLORS.textSecondary,
     fontSize: 14,
     fontWeight: '500',
   },

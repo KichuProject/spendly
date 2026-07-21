@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Animated,
   Modal,
   Platform,
-  ScrollView,
   KeyboardAvoidingView,
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, GLASS, TYPOGRAPHY, WEB_STYLES } from '../styles/theme';
-import GlassInput from './GlassInput';
-import GlassButton from './GlassButton';
+import ThemedText from './common/ThemedText';
+import ThemedInput from './common/ThemedInput';
+import PrimaryButton from './buttons/PrimaryButton';
+import SecondaryButton from './buttons/SecondaryButton';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES } from '../styles/theme';
 
 export default function ChangePasswordModal({ visible, onSave, onCancel }) {
+  const { colors, radius } = useTheme();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -76,7 +78,6 @@ export default function ChangePasswordModal({ visible, onSave, onCancel }) {
 
     if (!isValid) return;
 
-    // Call onSave with password data
     onSave(currentPassword, newPassword);
   };
 
@@ -90,39 +91,42 @@ export default function ChangePasswordModal({ visible, onSave, onCancel }) {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
         >
-          <Animated.View style={[styles.modal, { transform: [{ scale: scaleAnim }] }]}>
+          <Animated.View style={[styles.modal, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.xl, transform: [{ scale: scaleAnim }] }]}>
             <View style={styles.header}>
-              <Text style={styles.title}>Change Password</Text>
-              <Pressable onPress={onCancel} style={[styles.closeBtn, WEB_STYLES.cursor]}>
-                <Ionicons name="close" size={24} color={COLORS.textSecondary} />
+              <ThemedText variant="h2" color="primary">Change Password</ThemedText>
+              <Pressable onPress={onCancel} style={[styles.closeBtn, { backgroundColor: colors.surfaceSecondary }, WEB_STYLES.cursor]}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
 
             <View style={styles.modalContent}>
               <View style={styles.group}>
-                <GlassInput
-                  placeholder="Current Password"
+                <ThemedInput
+                  label="Current Password"
+                  placeholder="Enter current password"
                   value={currentPassword}
                   onChangeText={setCurrentPassword}
-                  icon="🔑"
+                  icon={<Ionicons name="key" size={20} color={colors.warning} />}
                   secureTextEntry
                   error={currentPasswordError}
                   autoCapitalize="none"
                 />
-                <GlassInput
-                  placeholder="New Password"
+                <ThemedInput
+                  label="New Password"
+                  placeholder="Enter new password"
                   value={newPassword}
                   onChangeText={setNewPassword}
-                  icon="🔑"
+                  icon={<Ionicons name="lock-closed" size={20} color={colors.success} />}
                   secureTextEntry
                   error={newPasswordError}
                   autoCapitalize="none"
                 />
-                <GlassInput
-                  placeholder="Confirm New Password"
+                <ThemedInput
+                  label="Confirm New Password"
+                  placeholder="Confirm new password"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  icon="🔑"
+                  icon={<Ionicons name="lock-closed" size={20} color={colors.primary} />}
                   secureTextEntry
                   error={confirmPasswordError}
                   autoCapitalize="none"
@@ -130,8 +134,8 @@ export default function ChangePasswordModal({ visible, onSave, onCancel }) {
               </View>
 
               <View style={styles.buttons}>
-                <GlassButton title="Cancel" variant="ghost" onPress={onCancel} style={{ flex: 1 }} />
-                <GlassButton title="Update Pass" variant="primary" onPress={handleSave} style={{ flex: 1 }} />
+                <SecondaryButton title="Cancel" variant="muted" onPress={onCancel} style={{ flex: 1 }} />
+                <PrimaryButton title="Update Password" onPress={handleSave} style={{ flex: 1 }} />
               </View>
             </View>
           </Animated.View>
@@ -144,7 +148,7 @@ export default function ChangePasswordModal({ visible, onSave, onCancel }) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 3, 20, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
@@ -155,18 +159,23 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     width: '100%',
-    maxWidth: 440, // Expanded from 420 for slightly wider and more premium look
+    maxWidth: 440,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modal: {
-    ...GLASS.cardElevated,
-    backgroundColor: 'rgba(25, 20, 50, 0.96)',
-    padding: 24, // Expanded padding from 20 to 24 for a more spacious premium layout
+    borderWidth: 1,
+    padding: 24,
     width: '100%',
     ...Platform.select({
-      web: { boxShadow: '0 24px 64px rgba(0,0,0,0.6)' },
-      default: {},
+      web: { boxShadow: '0 24px 64px rgba(0,0,0,0.15)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
+        elevation: 12,
+      },
     }),
   },
   header: {
@@ -175,25 +184,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: 22,
-    fontWeight: '800',
-  },
   closeBtn: {
     padding: 4,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   modalContent: {
     gap: 16,
   },
   group: {
-    gap: 12,
+    gap: 4,
   },
   buttons: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 12, // Spacing between the last input and buttons
+    marginTop: 12,
   },
 });

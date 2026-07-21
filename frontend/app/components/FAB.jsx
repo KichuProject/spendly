@@ -12,7 +12,7 @@ export default function FAB({ onPress, icon = '+', style }) {
     <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }, style]}>
       <Pressable onPress={onPress} onPressIn={onIn} onPressOut={onOut} style={[styles.button, WEB_STYLES.cursor, WEB_STYLES.noSelect]}>
         <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-        <Text style={styles.icon}>{icon}</Text>
+        {React.isValidElement(icon) ? icon : <Text style={styles.icon}>{icon}</Text>}
       </Pressable>
     </Animated.View>
   );
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
       default: { right: 20 },
     }),
     ...SHADOWS.glow('#7C3AED'),
+    borderRadius: 30,
     zIndex: 100,
   },
   button: {
@@ -38,6 +39,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'transparent',
   },
   icon: { color: COLORS.textPrimary, fontSize: 28, fontWeight: '300', lineHeight: 32 },
 });

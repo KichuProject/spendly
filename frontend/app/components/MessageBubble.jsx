@@ -1,65 +1,90 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS } from '../styles/theme';
+import { useTheme } from '../styles/ThemeContext';
+import InlineQueryResult from './InlineQueryResult';
+import SlideUp from './animations/SlideUp';
 
 export default function MessageBubble({ message }) {
+  const { colors, radius } = useTheme();
   const isUser = message.role === 'user';
 
+  // Parse out filter metadata if present
+  const filterRegex = /\[FILTER:\s*(\{.*?\})\]/;
+  const match = message.content.match(filterRegex);
+  const filterString = match ? match[1] : null;
+
+  // Clean prompt helper tags from display content
+  const cleanContent = message.content.replace(filterRegex, '').trim();
+
   return (
-    <View style={[styles.container, isUser ? styles.userContainer : styles.aiContainer]}>
-      {!isUser && <MaterialCommunityIcons name="robot-outline" size={20} color={COLORS.textPrimary} style={styles.icon} />}
-      <View style={[styles.bubble, isUser ? styles.userBubble : styles.aiBubble]}>
-        <Text style={[styles.text, isUser ? styles.userText : styles.aiText]}>
-          {message.content}
-        </Text>
+    <SlideUp delay={0} distance={12} duration={250}>
+    <View style={[styles.wrapper, isUser ? styles.userWrapper : styles.aiWrapper]}>
+      {!isUser && (
+        <MaterialCommunityIcons
+          name="robot-outline"
+          size={18}
+          color={colors.textSecondary}
+          style={styles.icon}
+        />
+      )}
+      <View style={{ flex: 1, alignItems: isUser ? 'flex-end' : 'flex-start' }}>
+        <View
+          style={[
+            styles.bubble,
+            {
+              backgroundColor: isUser ? colors.primary : colors.surfaceSecondary,
+              borderColor: isUser ? 'transparent' : colors.border,
+              borderWidth: isUser ? 0 : 1,
+              borderBottomRightRadius: isUser ? 4 : radius.md,
+              borderBottomLeftRadius: isUser ? radius.md : 4,
+              borderRadius: radius.md,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.text,
+              {
+                color: isUser ? '#FFFFFF' : colors.textPrimary,
+              },
+            ]}
+          >
+            {cleanContent}
+          </Text>
+        </View>
+
+        {filterString && <InlineQueryResult filterString={filterString} />}
       </View>
     </View>
+    </SlideUp>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flexDirection: 'row',
-    marginVertical: 8,
-    maxWidth: '85%',
-    alignItems: 'flex-end',
+    marginVertical: 6,
+    maxWidth: '88%',
+    alignItems: 'flex-start',
   },
-  userContainer: {
+  userWrapper: {
     alignSelf: 'flex-end',
   },
-  aiContainer: {
+  aiWrapper: {
     alignSelf: 'flex-start',
   },
   icon: {
-    fontSize: 16,
     marginRight: 8,
-    marginBottom: 4,
+    marginTop: 8,
   },
   bubble: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     flexShrink: 1,
   },
-  userBubble: {
-    backgroundColor: '#7C3AED',
-    borderBottomRightRadius: 4,
-  },
-  aiBubble: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
   text: {
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  userText: {
-    color: '#FFFFFF',
-  },
-  aiText: {
-    color: COLORS.textPrimary,
+    fontSize: 14.5,
+    lineHeight: 20,
   },
 });

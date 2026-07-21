@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, Animated, Pressable, Platform, Modal
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSpeechRecognitionEvent, ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
-import { COLORS, SHADOWS, WEB_STYLES, GRADIENTS, GLASS } from '../styles/theme';
+import { COLORS, SHADOWS, WEB_STYLES, GRADIENTS } from '../styles/theme';
 import useChatStore from '../state/useChatStore';
 import { getToken } from '../state/useAuthStore';
 import { useNavigation } from '@react-navigation/native';
@@ -351,6 +351,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     ...SHADOWS.large,
     minHeight: 56,
+    width: '100%',
   },
   pillIconLeft: {
     marginRight: 12,
@@ -362,6 +363,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     maxHeight: 120,
     textAlignVertical: 'center',
+    ...Platform.select({
+      web: { outlineStyle: 'none' },
+      default: {},
+    }),
   },
   pillActionsRight: {
     flexDirection: 'row',

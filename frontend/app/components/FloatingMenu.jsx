@@ -1,10 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Platform, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { GRADIENTS, SHADOWS, COLORS, WEB_STYLES } from '../styles/theme';
+import { View, StyleSheet, Animated, Platform, Pressable } from 'react-native';
+import { useTheme } from '../styles/ThemeContext';
+import ThemedText from './common/ThemedText';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { WEB_STYLES } from '../styles/theme';
 
-export default function FloatingMenu({ onManualAdd, onAiAdd, style }) {
+export default function FloatingMenu({ onManualAdd, onAiAdd, onAddIncome, style }) {
+  const { colors, radius, elevation } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
 
@@ -40,17 +42,6 @@ export default function FloatingMenu({ onManualAdd, onAiAdd, style }) {
     }),
   };
 
-  const rotation = {
-    transform: [
-      {
-        rotate: animation.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '45deg'],
-        }),
-      },
-    ],
-  };
-
   const handleManualAdd = () => {
     toggleMenu();
     onManualAdd();
@@ -61,26 +52,81 @@ export default function FloatingMenu({ onManualAdd, onAiAdd, style }) {
     onAiAdd();
   };
 
+  const handleAddIncome = () => {
+    toggleMenu();
+    if (onAddIncome) onAddIncome();
+  };
+
   return (
-    <View style={[styles.container, style]} pointerEvents="box-none">
-      <Animated.View style={[styles.menu, menuStyle]} pointerEvents={isOpen ? 'auto' : 'none'}>
-        <Pressable onPress={handleAiAdd} style={[styles.menuItem, WEB_STYLES.cursor]}>
-          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <MaterialCommunityIcons name="robot-outline" size={20} color={COLORS.textPrimary} />
-            <Text style={styles.menuItemText}>AI Add</Text>
+    <View style={[styles.container, style, { pointerEvents: 'box-none' }]}>
+      <Animated.View style={[styles.menu, menuStyle, { pointerEvents: isOpen ? 'auto' : 'none' }]}>
+        <Pressable 
+          onPress={handleAiAdd} 
+          style={({ pressed }) => [
+            styles.menuItem, 
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && { opacity: 0.8 },
+            WEB_STYLES.cursor
+          ]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <MaterialCommunityIcons name="robot-outline" size={20} color={colors.primary} />
+            <ThemedText variant="body" color="primary" style={styles.menuItemText}>AI Add</ThemedText>
           </View>
         </Pressable>
-        <Pressable onPress={handleManualAdd} style={[styles.menuItem, WEB_STYLES.cursor]}>
-          <LinearGradient colors={['rgba(30,41,59,0.9)', 'rgba(15,23,42,0.95)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-          <Text style={styles.menuItemText}>➕ Manual Add</Text>
+
+        <Pressable 
+          onPress={handleAddIncome} 
+          style={({ pressed }) => [
+            styles.menuItem, 
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && { opacity: 0.8 },
+            WEB_STYLES.cursor
+          ]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Ionicons name="trending-up-outline" size={18} color={colors.success} />
+            <ThemedText variant="body" color="success" style={[styles.menuItemText, { color: colors.success }]}>Add Income</ThemedText>
+          </View>
+        </Pressable>
+        
+        <Pressable 
+          onPress={handleManualAdd} 
+          style={({ pressed }) => [
+            styles.menuItem, 
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            pressed && { opacity: 0.8 },
+            WEB_STYLES.cursor
+          ]}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Ionicons name="add" size={18} color={colors.textSecondary} />
+            <ThemedText variant="body" color="secondary" style={styles.menuItemText}>Manual Add</ThemedText>
+          </View>
         </Pressable>
       </Animated.View>
 
-      <Animated.View style={styles.fabWrapper}>
-        <Pressable onPress={toggleMenu} style={[styles.button, WEB_STYLES.cursor, WEB_STYLES.noSelect]}>
-          <LinearGradient colors={GRADIENTS.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-          <Ionicons name={isOpen ? "close" : "wallet-outline"} size={isOpen ? 32 : 26} color={COLORS.textPrimary} />
+      <Animated.View style={[styles.fabWrapper, elevation.md, {
+        transform: [
+          {
+            rotate: animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['0deg', '90deg'],
+            }),
+          },
+        ],
+      }]}>
+        <Pressable 
+          onPress={toggleMenu} 
+          style={({ pressed }) => [
+            styles.button, 
+            { backgroundColor: colors.primary, borderColor: colors.border },
+            pressed && { opacity: 0.9 },
+            WEB_STYLES.cursor, 
+            WEB_STYLES.noSelect
+          ]}
+        >
+          <Ionicons name={isOpen ? "close" : "wallet-outline"} size={isOpen ? 30 : 24} color={colors.textInverse} />
         </Pressable>
       </Animated.View>
     </View>
@@ -107,18 +153,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 24,
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.25)',
-    ...SHADOWS.glow('#7C3AED'),
+    borderWidth: 1,
+    ...Platform.select({
+      web: { boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 6,
+        elevation: 3,
+      },
+    }),
   },
   menuItemText: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   fabWrapper: {
-    ...SHADOWS.glow('#7C3AED'),
+    borderRadius: 30,
   },
   button: {
     width: 60,
@@ -126,8 +177,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 1,
   },
 });

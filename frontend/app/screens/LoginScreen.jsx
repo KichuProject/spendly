@@ -1,21 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, Pressable, StyleSheet, Animated,
-  Dimensions, Platform, ScrollView, KeyboardAvoidingView,
+  Dimensions, Platform, ScrollView, KeyboardAvoidingView, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import LiquidBackground from '../components/LiquidBackground';
-import GlassInput from '../components/GlassInput';
-import GlassButton from '../components/GlassButton';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import ThemedView from '../components/common/ThemedView';
+import ThemedText from '../components/common/ThemedText';
+import ThemedCard from '../components/common/ThemedCard';
+import ThemedInput from '../components/common/ThemedInput';
+import PrimaryButton from '../components/buttons/PrimaryButton';
 import OTPInput from '../components/OTPInput';
+
 import { useToast } from '../components/ToastNotification';
 import useAuthStore from '../state/useAuthStore';
-import { COLORS, GRADIENTS, GLASS, SHADOWS, WEB_STYLES } from '../styles/theme';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { useTheme } from '../styles/ThemeContext';
+import { getScreenPaddingTop } from '../utils/platformUtils';
+import { WEB_STYLES } from '../styles/theme';
+import SuccessCheckmark from '../components/animations/SuccessCheckmark';
 
 export default function LoginScreen() {
+  const { colors, radius, spacing, elevation } = useTheme();
+  const insets = useSafeAreaInsets();
+
   const [tab, setTab] = useState('login');
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -37,10 +45,16 @@ export default function LoginScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideUpAnim = useRef(new Animated.Value(40)).current;
   const successAnim = useRef(new Animated.Value(0)).current;
+  const logoFloat = useRef(new Animated.Value(0)).current;
 
   const iconRotate = successAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['-45deg', '0deg'],
+  });
+
+  const logoTranslateY = logoFloat.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -6],
   });
 
   useEffect(() => {
@@ -48,6 +62,16 @@ export default function LoginScreen() {
       Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
       Animated.spring(slideUpAnim, { toValue: 0, useNativeDriver: true, tension: 60, friction: 12 }),
     ]).start();
+
+    // Floating diamond animation
+    const floatLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(logoFloat, { toValue: 1, duration: 1500, useNativeDriver: true }),
+        Animated.timing(logoFloat, { toValue: 0, duration: 1500, useNativeDriver: true }),
+      ])
+    );
+    floatLoop.start();
+    return () => floatLoop.stop();
   }, []);
 
   useEffect(() => {
@@ -90,13 +114,12 @@ export default function LoginScreen() {
       try {
         const result = await forgotPassword(email);
         if (result) {
-          // Transition to Step 3 (Success Animation)
           setStep(3);
           Animated.timing(successAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
 
           setTimeout(() => {
             switchTab('login');
-            showToast('Password reset link sent!', 'success', 3000, <Ionicons name="mail-outline" size={20} color="#10B981" />);
+            showToast('Password reset link sent!', 'success', 3000, <Ionicons name="mail-outline" size={20} color={colors.success} />);
           }, 2000);
         } else {
           const errMsg = useAuthStore.getState().error || 'Failed to send reset email';
@@ -129,7 +152,7 @@ export default function LoginScreen() {
         if (result) {
           setStep(2);
           setCountdown(30);
-          showToast('Verification code sent to your email!', 'success', 3000, <Ionicons name="mail-outline" size={20} color="#10B981" />);
+          showToast('Verification code sent to your email!', 'success', 3000, <Ionicons name="mail-outline" size={20} color={colors.success} />);
         } else {
           const errMsg = useAuthStore.getState().error || 'Failed to register. Please try again.';
           showToast(errMsg, 'error');
@@ -145,7 +168,7 @@ export default function LoginScreen() {
       try {
         const result = await login(email.trim(), password);
         if (result) {
-          showToast('Welcome back! 👋', 'success');
+          showToast('Welcome back!', 'success');
         } else {
           const errMsg = useAuthStore.getState().error || '';
           if (errMsg.includes('User not found')) {
@@ -186,7 +209,7 @@ export default function LoginScreen() {
     setCountdown(30);
     const result = await startSignup(name.trim(), email.trim());
     if (result) {
-      showToast('A new verification code has been sent!', 'success', 3000, <Ionicons name="mail-unread-outline" size={20} color="#10B981" />);
+      showToast('A new verification code has been sent!', 'success', 3000, <Ionicons name="mail-unread-outline" size={20} color={colors.success} />);
     } else {
       const errMsg = useAuthStore.getState().error || 'Failed to resend OTP.';
       showToast(errMsg, 'error');
@@ -194,14 +217,14 @@ export default function LoginScreen() {
   };
 
   return (
-    <LiquidBackground>
+    <ThemedView variant="bg" style={styles.flex}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingTop: getScreenPaddingTop(insets.top) }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           bounces={false}
@@ -209,82 +232,86 @@ export default function LoginScreen() {
           <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideUpAnim }] }]}>
             {/* Branding */}
             <View style={styles.branding}>
-              <View style={styles.logoCircle}>
-                <LinearGradient
-                  colors={GRADIENTS.primary}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={StyleSheet.absoluteFill}
-                />
-                <Text style={styles.logoEmoji}>💎</Text>
+              <Animated.View style={{ transform: [{ translateY: logoTranslateY }] }}>
+              <View style={[styles.logoCircle, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
+                <Image source={require('../../assets/diamond_glow.png')} style={styles.logoImage} />
               </View>
-              <Text style={styles.appName}>Spendly</Text>
-              <Text style={styles.tagline}>Track. Split. Settle.</Text>
+              </Animated.View>
+              <ThemedText variant="hero" color="primary" style={styles.appName}>Spendly</ThemedText>
+              <ThemedText variant="bodySmall" color="secondary" style={styles.tagline}>Track · Split · Settle</ThemedText>
             </View>
 
             {/* Main Card */}
-            <View style={styles.card}>
-              {/* Glass effect layers */}
-              <View style={styles.cardGlassBg} />
-              <View style={styles.cardShimmer} />
-
+            <ThemedCard style={styles.card} elevated>
               {step <= 1 && (
                 <View style={styles.cardContent}>
                   {/* Tab header or welcome message */}
-                  {tab === 'login' ? (
-                    <View style={{ marginBottom: 24, alignItems: 'center' }}>
-                      <Text style={{ color: COLORS.textPrimary, fontSize: 22, fontWeight: '800' }}>Welcome Back</Text>
-                      <Text style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: '500', marginTop: 4 }}>Sign in to continue tracking your expenses</Text>
-                    </View>
-                  ) : tab === 'signup' ? (
-                    <View style={{ marginBottom: 24, alignItems: 'center' }}>
-                      <Text style={{ color: COLORS.textPrimary, fontSize: 22, fontWeight: '800' }}>Create Account</Text>
-                      <Text style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: '500', marginTop: 4 }}>Sign up to start tracking your expenses</Text>
-                    </View>
-                  ) : (
-                    <View style={{ marginBottom: 24, alignItems: 'center' }}>
-                      <Text style={{ color: COLORS.textPrimary, fontSize: 22, fontWeight: '800' }}>Reset Password</Text>
-                      <Text style={{ color: COLORS.textMuted, fontSize: 13, fontWeight: '500', marginTop: 4, textAlign: 'center' }}>Enter your email to receive a password reset link</Text>
-                    </View>
-                  )}
+                  <View style={styles.tabRowHeader}>
+                    {tab === 'login' ? (
+                      <View style={styles.welcomeMsg}>
+                        <ThemedText variant="h2" color="primary">Welcome Back</ThemedText>
+                        <ThemedText variant="caption" color="secondary" style={{ marginTop: 4 }}>
+                          Sign in to continue tracking your expenses
+                        </ThemedText>
+                      </View>
+                    ) : tab === 'signup' ? (
+                      <View style={styles.welcomeMsg}>
+                        <ThemedText variant="h2" color="primary">Create Account</ThemedText>
+                        <ThemedText variant="caption" color="secondary" style={{ marginTop: 4 }}>
+                          Sign up to start tracking your expenses
+                        </ThemedText>
+                      </View>
+                    ) : (
+                      <View style={styles.welcomeMsg}>
+                        <ThemedText variant="h2" color="primary">Reset Password</ThemedText>
+                        <ThemedText variant="caption" color="secondary" style={{ marginTop: 4, textAlign: 'center' }}>
+                          Enter your email to receive a password reset link
+                        </ThemedText>
+                      </View>
+                    )}
+                  </View>
 
                   {/* Form */}
                   <View style={styles.form}>
                     {tab === 'signup' && (
-                      <GlassInput
-                        placeholder="Full Name"
+                      <ThemedInput
+                        label="Full Name"
+                        placeholder="e.g. Kichu"
                         value={name}
                         onChangeText={(val) => { setName(val); setNameError(''); }}
-                        icon="👤"
+                        icon={<Ionicons name="person" size={20} color={colors.primary} />}
                         error={nameError}
                         autoCapitalize="words"
                       />
                     )}
-                    <GlassInput
-                      placeholder={tab === 'login' ? "Email or Phone Number" : "Email Address"}
+                    <ThemedInput
+                      label={tab === 'login' ? "Email or Phone Number" : "Email Address"}
+                      placeholder="e.g. kichu@example.com"
                       value={email}
                       onChangeText={(val) => { setEmail(val); setEmailError(''); }}
-                      icon={tab === 'login' ? "👤" : "✉️"}
+                      icon={<Ionicons name="mail" size={20} color={colors.accent} />}
                       error={emailError}
                       keyboardType={tab === 'login' ? "default" : "email-address"}
                       autoCapitalize="none"
                     />
                     {tab === 'signup' && (
-                      <GlassInput
-                        placeholder="Phone Number"
+                      <ThemedInput
+                        label="Phone Number"
+                        placeholder="e.g. 9876543210"
                         value={phone}
                         onChangeText={(val) => { setPhone(val); setPhoneError(''); }}
-                        icon="📱"
+                        icon={<Ionicons name="phone-portrait" size={20} color={colors.warning} />}
                         error={phoneError}
                         keyboardType="phone-pad"
                       />
                     )}
                     {tab !== 'forgot' && (
-                      <GlassInput
-                        placeholder="Password"
+                      <ThemedInput
+                        label="Password"
+                        placeholder="••••••"
                         value={password}
                         onChangeText={(val) => { setPassword(val); setPasswordError(''); }}
-                        icon="🔑"
+                        icon={<Ionicons name="lock-closed" size={20} color={colors.success} />}
                         secureTextEntry
                         error={passwordError}
                         autoCapitalize="none"
@@ -296,18 +323,19 @@ export default function LoginScreen() {
                         style={({ pressed }) => [
                           styles.forgotPasswordContainer,
                           pressed && { opacity: 0.7 },
-                          WEB_STYLES.cursor
+                          WEB_STYLES.cursor,
                         ]}
                       >
-                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                        <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>Forgot Password?</Text>
                       </Pressable>
                     )}
                     {tab === 'signup' && (
-                      <GlassInput
-                        placeholder="Confirm Password"
+                      <ThemedInput
+                        label="Confirm Password"
+                        placeholder="••••••"
                         value={confirmPassword}
                         onChangeText={(val) => { setConfirmPassword(val); setConfirmPasswordError(''); }}
-                        icon="🔑"
+                        icon={<Ionicons name="lock-closed" size={20} color={colors.primary} />}
                         secureTextEntry
                         error={confirmPasswordError}
                         autoCapitalize="none"
@@ -316,29 +344,27 @@ export default function LoginScreen() {
                   </View>
 
                   {/* Submit button */}
-                  <GlassButton
+                  <PrimaryButton
                     title={
                       tab === 'login'
-                        ? 'Login →'
+                        ? 'Login'
                         : tab === 'signup'
-                        ? 'Create Account →'
-                        : 'Send Reset Link →'
+                        ? 'Create Account'
+                        : 'Send Reset Link'
                     }
-                    variant="primary"
                     onPress={handleAuthSubmit}
                     loading={isLoading}
                     disabled={isLoading}
-                    fullWidth
                     style={styles.submitBtn}
                   />
 
                   {/* Footer hint */}
-                  <Text style={styles.footerHint}>
+                  <Text style={[styles.footerHint, { color: colors.textSecondary }]}>
                     {tab === 'login' ? (
                       <>
                         {"Don't have an account? "}
                         <Text
-                          style={styles.footerLink}
+                          style={[styles.footerLink, { color: colors.primary }]}
                           onPress={() => switchTab('signup')}
                         >
                           Sign Up
@@ -348,7 +374,7 @@ export default function LoginScreen() {
                       <>
                         {"Already have an account? "}
                         <Text
-                          style={styles.footerLink}
+                          style={[styles.footerLink, { color: colors.primary }]}
                           onPress={() => switchTab('login')}
                         >
                           Login
@@ -358,7 +384,7 @@ export default function LoginScreen() {
                       <>
                         {"Remembered your password? "}
                         <Text
-                          style={styles.footerLink}
+                          style={[styles.footerLink, { color: colors.primary }]}
                           onPress={() => switchTab('login')}
                         >
                           Login
@@ -372,19 +398,19 @@ export default function LoginScreen() {
               {step === 2 && (
                 <View style={styles.cardContent}>
                   <View style={styles.otpSection}>
-                    <View style={[styles.otpHeaderIcon, { backgroundColor: 'rgba(251, 191, 36, 0.12)', borderColor: 'rgba(251, 191, 36, 0.3)' }]}>
-                      <Ionicons name="lock-closed-outline" size={26} color="#FBBF24" />
+                    <View style={[styles.otpHeaderIcon, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
+                      <Ionicons name="mail-open-outline" size={26} color={colors.primary} />
                     </View>
-                    <Text style={styles.otpTitle}>Verify Your Email</Text>
-                    <Text style={styles.otpSubtitle}>Enter the 6-digit code sent to</Text>
-                    <Text style={styles.otpEmail}>{email}</Text>
+                    <ThemedText variant="h2" color="primary" style={styles.otpTitle}>Verify Your Email</ThemedText>
+                    <ThemedText variant="bodySmall" color="secondary" style={styles.otpSubtitle}>Enter the 6-digit code sent to</ThemedText>
+                    <Text style={[styles.otpEmail, { color: colors.primary }]}>{email}</Text>
 
                     {/* Step indicator */}
                     <View style={styles.stepRow}>
                       {[1, 2, 3].map((d) => (
                         <View key={d} style={styles.stepItem}>
-                          <View style={[styles.stepDot, step >= d && styles.stepDotActive]} />
-                          {d < 3 && <View style={[styles.stepLine, step > d && styles.stepLineActive]} />}
+                          <View style={[styles.stepDot, step >= d && { backgroundColor: colors.primary, borderColor: colors.primary }]} />
+                          {d < 3 && <View style={[styles.stepLine, step > d && { backgroundColor: colors.primary }]} />}
                         </View>
                       ))}
                     </View>
@@ -393,17 +419,17 @@ export default function LoginScreen() {
 
                     <View style={styles.resendRow}>
                       {countdown > 0 ? (
-                        <Text style={styles.resendTimer}>Resend code in {countdown}s</Text>
+                        <ThemedText variant="bodySmall" color="secondary" style={styles.resendTimer}>Resend code in {countdown}s</ThemedText>
                       ) : (
                         <Pressable onPress={handleResendOtp} style={[WEB_STYLES.cursor, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
-                          <Ionicons name="mail-unread-outline" size={16} color="#34D399" />
-                          <Text style={[styles.resendLink, { color: '#34D399' }]}>Resend Code</Text>
+                          <Ionicons name="mail-unread-outline" size={16} color={colors.success} />
+                          <Text style={[styles.resendLink, { color: colors.success }]}>Resend Code</Text>
                         </Pressable>
                       )}
                     </View>
 
-                    <Pressable onPress={() => setStep(1)} style={[styles.backButton, WEB_STYLES.cursor]}>
-                      <Text style={styles.backButtonText}>← Change Email</Text>
+                    <Pressable onPress={() => setStep(1)} style={[styles.backButton, { backgroundColor: colors.borderLight }, WEB_STYLES.cursor]}>
+                      <ThemedText variant="bodySmall" color="secondary">← Change Email</ThemedText>
                     </Pressable>
                   </View>
                 </View>
@@ -412,33 +438,28 @@ export default function LoginScreen() {
               {step === 3 && (
                 <View style={styles.cardContent}>
                   <Animated.View style={[styles.successSection, { opacity: successAnim, transform: [{ scale: successAnim }, { rotate: iconRotate }] }]}>
-                    <View style={styles.successIconCircle}>
-                      <Ionicons name="checkmark-circle" size={64} color="#10B981" />
-                    </View>
-                    <Text style={styles.successTitle}>
+                    <SuccessCheckmark size={96} style={{ marginBottom: 20 }} />
+                    <ThemedText variant="h2" color="primary" style={styles.successTitle}>
                       {tab === 'forgot' ? 'Email Sent!' : 'Welcome!'}
-                    </Text>
-                    <Text style={styles.successSubtitle}>
+                    </ThemedText>
+                    <ThemedText variant="bodySmall" color="secondary" style={styles.successSubtitle}>
                       {tab === 'forgot' ? 'Check your inbox for reset instructions' : 'Setting up your account...'}
-                    </Text>
-                    <View style={styles.successDots}>
-                      {[0, 1, 2].map((i) => (
-                        <View key={i} style={[styles.successDot, { opacity: 0.3 + i * 0.3 }]} />
-                      ))}
-                    </View>
+                    </ThemedText>
                   </Animated.View>
                 </View>
               )}
-            </View>
+            </ThemedCard>
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LiquidBackground>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
@@ -450,122 +471,69 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-
-  // --- Branding ---
   branding: {
     alignItems: 'center',
-    marginBottom: 36,
+    marginBottom: 32,
   },
   logoCircle: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderWidth: 2,
     overflow: 'hidden',
     marginBottom: 16,
-    borderWidth: 2,
-    borderColor: 'rgba(124,58,237,0.4)',
-    ...SHADOWS.glow('#7C3AED'),
-  },
-  logoEmoji: {
-    fontSize: 32,
-    zIndex: 1,
-  },
-  appName: {
-    color: COLORS.textPrimary,
-    fontSize: 38,
-    fontWeight: '800',
-    letterSpacing: -1,
     ...Platform.select({
-      web: { textShadow: '0 0 24px rgba(124,58,237,0.5)' },
+      web: { filter: 'drop-shadow(0 0 16px rgba(124,58,237,0.6))' },
       default: {
-        textShadowColor: 'rgba(124,58,237,0.5)',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 24,
+        shadowColor: '#7C3AED',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 16,
+        elevation: 8,
       },
     }),
   },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  appName: {
+    fontWeight: '800',
+  },
   tagline: {
-    color: COLORS.textMuted,
-    fontSize: 15,
-    fontWeight: '500',
-    marginTop: 6,
-    letterSpacing: 1,
+    marginTop: 4,
+    letterSpacing: 0.5,
   },
-
-  // --- Card ---
   card: {
-    borderRadius: 28,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.18)',
+    padding: 0,
     overflow: 'hidden',
-    ...SHADOWS.large,
-  },
-  cardGlassBg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(20,16,50,0.85)',
-  },
-  cardShimmer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '45%',
-    height: 1.5,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderTopLeftRadius: 28,
-    zIndex: 2,
   },
   cardContent: {
     padding: 24,
-    paddingTop: 20,
   },
-
-  // --- Tabs ---
-  tabRow: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 16,
-    padding: 4,
-    marginBottom: 24,
+  tabRowHeader: {
+    marginBottom: 28,
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
+  welcomeMsg: {
     alignItems: 'center',
-    overflow: 'hidden',
   },
-  tabText: {
-    color: COLORS.textMuted,
-    fontSize: 15,
-    fontWeight: '700',
-    zIndex: 1,
-  },
-  tabTextActive: {
-    color: COLORS.textPrimary,
-  },
-
-  // --- Form ---
   form: {
-    gap: 16,
+    gap: 4,
     marginBottom: 20,
   },
   submitBtn: {
     marginBottom: 16,
+    width: '100%',
   },
   footerHint: {
-    color: COLORS.textMuted,
     fontSize: 13,
     fontWeight: '500',
     textAlign: 'center',
   },
   footerLink: {
-    color: '#A78BFA',
     fontWeight: '700',
   },
-
-  // --- OTP ---
   otpSection: {
     alignItems: 'center',
     gap: 12,
@@ -575,28 +543,18 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: 'rgba(124,58,237,0.15)',
     borderWidth: 1.5,
-    borderColor: 'rgba(124,58,237,0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
   },
-  otpIconText: {
-    fontSize: 24,
-  },
   otpTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 22,
     fontWeight: '800',
   },
   otpSubtitle: {
-    color: COLORS.textMuted,
-    fontSize: 14,
     fontWeight: '500',
   },
   otpEmail: {
-    color: '#A78BFA',
     fontSize: 14,
     fontWeight: '700',
     marginBottom: 4,
@@ -614,33 +572,23 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  stepDotActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    borderColor: 'rgba(0,0,0,0.2)',
   },
   stepLine: {
     width: 32,
     height: 2,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.08)',
     marginHorizontal: 4,
-  },
-  stepLineActive: {
-    backgroundColor: COLORS.primary,
   },
   resendRow: {
     marginTop: 8,
   },
   resendTimer: {
-    color: COLORS.textMuted,
-    fontSize: 13,
     fontWeight: '600',
   },
   resendLink: {
-    color: '#A78BFA',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -649,26 +597,18 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-  },
-  backButtonText: {
-    color: COLORS.textMuted,
-    fontSize: 13,
-    fontWeight: '600',
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginTop: -8,
+    marginTop: -4,
     paddingVertical: 4,
     paddingHorizontal: 8,
+    marginBottom: 12,
   },
   forgotPasswordText: {
-    color: '#A78BFA',
     fontSize: 13,
     fontWeight: '600',
   },
-
-  // --- Success ---
   successSection: {
     alignItems: 'center',
     paddingVertical: 40,
@@ -677,36 +617,15 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     borderWidth: 2.5,
-    borderColor: 'rgba(16, 185, 129, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
-    ...Platform.select({
-      web: { boxShadow: '0 0 24px rgba(16, 185, 129, 0.3)' },
-      default: { shadowColor: '#10B981', shadowOpacity: 0.3, shadowRadius: 24, elevation: 6 },
-    }),
   },
   successTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 32,
     fontWeight: '800',
   },
   successSubtitle: {
-    color: COLORS.textMuted,
-    fontSize: 16,
     marginTop: 8,
-  },
-  successDots: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 24,
-  },
-  successDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.primary,
   },
 });

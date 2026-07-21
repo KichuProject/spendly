@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { COLORS, GLASS, WEB_STYLES } from '../styles/theme';
-import GlassButton from './GlassButton';
-import GlassInput from './GlassInput';
+import { View, Pressable, StyleSheet, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import ThemedText from './common/ThemedText';
+import ThemedInput from './common/ThemedInput';
+import PrimaryButton from './buttons/PrimaryButton';
 import AutocompleteInput from './AutocompleteInput';
 import DateRangePicker from './DateRangePicker';
 import { formatDate } from '../utils/dateUtils';
-import { formatCurrency, parseCurrency } from '../utils/currencyUtils';
+import { parseCurrency } from '../utils/currencyUtils';
 import { getCategoryInfo, getCategoryKeywords } from '../utils/categoryUtils';
 import useExpenseStore from '../state/useExpenseStore';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES } from '../styles/theme';
 
 export default function AddExpenseSheetFriends({ visible, onClose, onSave, friendId, friendName, editExpense }) {
+  const { colors, radius } = useTheme();
   const pastReasons = useExpenseStore((s) => s.pastReasons);
 
   const [reason, setReason] = useState('');
@@ -35,9 +39,12 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
     }
   }, [visible, editExpense]);
 
-  const resetForm = () => { setReason(''); setAmount(''); setDate(new Date()); setDirection('theyOwe'); };
-
-
+  const resetForm = () => {
+    setReason('');
+    setAmount('');
+    setDate(new Date());
+    setDirection('theyOwe');
+  };
 
   const totalAmount = parseCurrency(amount);
   const canSave = reason.trim() && totalAmount > 0;
@@ -72,22 +79,24 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
     <Modal transparent visible={visible} animationType="slide">
       <KeyboardAvoidingView 
         style={styles.backdrop} 
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.dimArea} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }]}>
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>
-              {editExpense ? 'Edit Expense ✏️' : 'Add Expense 💵'}
-            </Text>
-            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={styles.close}>✕</Text></Pressable>
+            <ThemedText variant="h2" color="primary">
+              {editExpense ? 'Edit Expense ✏' : 'Add Expense 💵'}
+            </ThemedText>
+            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}>
+              <Ionicons name="close" size={24} color={colors.textSecondary} style={{ padding: 4 }} />
+            </Pressable>
           </View>
           <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll} keyboardShouldPersistTaps="handled">
             {/* Reason */}
-            <Text style={styles.fieldLabel}>What was it for?</Text>
+            <ThemedText variant="bodySmall" color="secondary" style={styles.fieldLabel}>What was it for?</ThemedText>
             <View style={styles.reasonRow}>
-              <Text style={styles.reasonEmoji}>{emoji}</Text>
+              <ThemedText variant="h1" style={styles.reasonEmoji}>{emoji}</ThemedText>
               <AutocompleteInput
                 placeholder="e.g. Lunch, Uber, Groceries..."
                 value={reason}
@@ -98,45 +107,78 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
               />
             </View>
 
-
             {/* Amount */}
-            <Text style={styles.fieldLabel}>How much?</Text>
-            <GlassInput
+            <View style={{ height: 12 }} />
+            <ThemedInput
+              label="How much?"
               placeholder="0.00"
               value={amount}
               onChangeText={setAmount}
-              prefix="₹"
-              large
+              icon={<ThemedText variant="body" color="secondary" style={{ fontSize: 18, marginRight: 4 }}>₹</ThemedText>}
               keyboardType="decimal-pad"
             />
 
             {/* Date */}
-            <Text style={styles.fieldLabel}>When?</Text>
-            <Pressable onPress={() => setShowDatePicker(true)} style={[styles.datePill, WEB_STYLES.cursor]}>
-              <Text style={styles.dateIcon}>📅</Text>
-              <Text style={styles.dateText}>{formatDate(date)}</Text>
+            <ThemedText variant="bodySmall" color="secondary" style={styles.fieldLabel}>When?</ThemedText>
+            <Pressable 
+              onPress={() => setShowDatePicker(true)} 
+              style={[
+                styles.datePill, 
+                { 
+                  backgroundColor: colors.surfaceSecondary, 
+                  borderColor: colors.border,
+                  borderRadius: radius.md,
+                }, 
+                WEB_STYLES.cursor
+              ]}
+            >
+              <ThemedText style={styles.dateIcon}>📅</ThemedText>
+              <ThemedText style={styles.dateText}>{formatDate(date)}</ThemedText>
             </Pressable>
 
             {/* Direction toggle */}
-            <Text style={styles.fieldLabel}>Direction</Text>
+            <ThemedText variant="bodySmall" color="secondary" style={styles.fieldLabel}>Direction</ThemedText>
             <View style={styles.directionRow}>
-              <Pressable onPress={() => setDirection('theyOwe')} style={[styles.directionBtn, direction === 'theyOwe' && styles.directionBtnActive, WEB_STYLES.cursor]}>
-                <Text style={styles.directionIcon}>🟢</Text>
-                <Text style={[styles.directionText, direction === 'theyOwe' && styles.directionTextActive]}>Pay to me</Text>
+              <Pressable
+                onPress={() => setDirection('theyOwe')}
+                style={[
+                  styles.directionBtn,
+                  { 
+                    backgroundColor: colors.surfaceSecondary, 
+                    borderColor: colors.border,
+                    borderRadius: radius.md,
+                  },
+                  direction === 'theyOwe' && { borderColor: colors.success, backgroundColor: colors.success + '15' },
+                  WEB_STYLES.cursor
+                ]}
+              >
+                <ThemedText style={styles.directionIcon}>🟢</ThemedText>
+                <ThemedText style={[styles.directionText, direction === 'theyOwe' && { color: colors.success, fontWeight: '700' }]}>Pay to me</ThemedText>
               </Pressable>
-              <Pressable onPress={() => setDirection('iOwe')} style={[styles.directionBtn, direction === 'iOwe' && styles.directionBtnActive, WEB_STYLES.cursor]}>
-                <Text style={styles.directionIcon}>🔴</Text>
-                <Text style={[styles.directionText, direction === 'iOwe' && styles.directionTextActive]}>Pay to you</Text>
+              <Pressable
+                onPress={() => setDirection('iOwe')}
+                style={[
+                  styles.directionBtn,
+                  { 
+                    backgroundColor: colors.surfaceSecondary, 
+                    borderColor: colors.border,
+                    borderRadius: radius.md,
+                  },
+                  direction === 'iOwe' && { borderColor: colors.danger, backgroundColor: colors.danger + '15' },
+                  WEB_STYLES.cursor
+                ]}
+              >
+                <ThemedText style={styles.directionIcon}>🔴</ThemedText>
+                <ThemedText style={[styles.directionText, direction === 'iOwe' && { color: colors.danger, fontWeight: '700' }]}>Pay to you</ThemedText>
               </Pressable>
             </View>
 
             <View style={{ height: 24 }} />
           </ScrollView>
 
-          <GlassButton
-            title={editExpense ? '💾 Update Expense' : '💾 Save Expense'}
+          <PrimaryButton
+            title={editExpense ? 'Update Expense' : 'Save Expense'}
             variant="success"
-            fullWidth
             onPress={handleSave}
             disabled={!canSave}
           />
@@ -150,51 +192,60 @@ export default function AddExpenseSheetFriends({ visible, onClose, onSave, frien
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    justifyContent: 'flex-end',
     ...Platform.select({
-      web: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
-      default: {},
+      web: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1000,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+      },
+      default: {
+        justifyContent: 'flex-end',
+      },
     }),
   },
   dimArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: 'rgba(20,16,50,0.98)',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
     padding: 20,
     paddingBottom: 32,
     maxHeight: '85%',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderWidth: 1,
     borderBottomWidth: 0,
     ...Platform.select({
-      web: { maxWidth: 480, width: '100%', alignSelf: 'center' },
+      web: {
+        maxWidth: 520,
+        width: '90%',
+        alignSelf: 'center',
+        borderBottomLeftRadius: 28,
+        borderBottomRightRadius: 28,
+        borderBottomWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+        elevation: 10,
+      },
       default: {},
     }),
   },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)', alignSelf: 'center', marginBottom: 16 },
+  handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  headerTitle: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700' },
-  close: { color: COLORS.textMuted, fontSize: 22, padding: 4 },
-  scroll: { maxHeight: Platform.OS === 'web' ? 400 : 250 },
-  fieldLabel: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8, marginTop: 16 },
+  scroll: { maxHeight: Platform.OS === 'web' ? 400 : 320 },
+  fieldLabel: { fontWeight: '600', marginBottom: 8, marginTop: 16 },
   reasonRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   reasonEmoji: { fontSize: 28 },
   reasonInput: { flex: 1 },
-  datePill: { flexDirection: 'row', alignItems: 'center', gap: 8, ...GLASS.input, paddingHorizontal: 16, paddingVertical: 14 },
+  datePill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 14, borderWidth: 1.5 },
   dateIcon: { fontSize: 16 },
-  dateText: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '600' },
+  dateText: { fontSize: 15, fontWeight: '600' },
   directionRow: { flexDirection: 'row', gap: 12 },
-  directionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, ...GLASS.input, paddingVertical: 16, borderRadius: 20 },
-  directionBtnActive: { borderColor: COLORS.glassActiveBorder, backgroundColor: 'rgba(124,58,237,0.12)' },
+  directionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderWidth: 1.5 },
   directionIcon: { fontSize: 16 },
-  directionText: { color: COLORS.textMuted, fontSize: 14, fontWeight: '700' },
-  directionTextActive: { color: COLORS.textPrimary },
-  categoryHintCard: { marginTop: 8, padding: 10, borderRadius: 12, borderWidth: 1, gap: 4 },
-  categoryHintHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  categoryHintBulb: { fontSize: 13 },
-  categoryHintLabel: { color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
-  categoryHintBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, borderWidth: 1 },
-  categoryHintBadgeText: { fontSize: 11, fontWeight: '800' },
-  categoryHintKeywords: { color: COLORS.textMuted, fontSize: 11, fontWeight: '500', fontStyle: 'italic', marginLeft: 19 },
+  directionText: { fontSize: 14, fontWeight: '600' },
 });

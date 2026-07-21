@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, KeyboardAvoidingView, Platform } from 'react-native';
-import { COLORS, WEB_STYLES } from '../styles/theme';
+import { View, Pressable, StyleSheet, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import GlassButton from './GlassButton';
-import GlassInput from './GlassInput';
+import ThemedText from './common/ThemedText';
+import ThemedInput from './common/ThemedInput';
+import PrimaryButton from './buttons/PrimaryButton';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES } from '../styles/theme';
 
 export default function AddFriendSheet({ visible, onClose, onSave }) {
+  const { colors, radius } = useTheme();
   const [name, setName] = useState('');
 
   useEffect(() => {
@@ -28,35 +31,36 @@ export default function AddFriendSheet({ visible, onClose, onSave }) {
     <Modal transparent visible={visible} animationType="slide">
       <KeyboardAvoidingView 
         style={styles.backdrop} 
-        behavior="padding"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.dimArea} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }]}>
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
-              <Text style={styles.headerTitle}>Add Friend</Text>
-              <Ionicons name="person-add-outline" size={22} color="#A78BFA" />
+              <ThemedText variant="h2" color="primary">Add Friend</ThemedText>
+              <Ionicons name="person-add-outline" size={22} color={colors.primary} />
             </View>
-            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}><Text style={styles.close}>✕</Text></Pressable>
+            <Pressable onPress={onClose} style={[WEB_STYLES.cursor]}>
+              <Ionicons name="close" size={24} color={colors.textSecondary} style={{ padding: 4 }} />
+            </Pressable>
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.fieldLabel}>What is your friend's name?</Text>
-            <GlassInput
+            <ThemedText variant="bodySmall" color="secondary" style={styles.fieldLabel}>What is your friend's name?</ThemedText>
+            <ThemedInput
               placeholder="e.g. Rahul, Priya, Alex..."
               value={name}
               onChangeText={setName}
-              icon="👤"
+              icon={<Ionicons name="person" size={20} color={colors.primary} />}
               autoFocus
             />
-            <View style={{ height: 24 }} />
+            <View style={{ height: 16 }} />
           </View>
 
-          <GlassButton
-            title="✨ Add Friend"
+          <PrimaryButton
+            title="Add Friend"
             variant="success"
-            fullWidth
             onPress={handleSave}
             disabled={!name.trim()}
           />
@@ -77,24 +81,18 @@ const styles = StyleSheet.create({
   },
   dimArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)' },
   sheet: {
-    backgroundColor: 'rgba(20,16,50,0.98)',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
     padding: 20,
     paddingBottom: 32,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderWidth: 1,
     borderBottomWidth: 0,
     ...Platform.select({
       web: { maxWidth: 480, width: '100%', alignSelf: 'center' },
       default: {},
     }),
   },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)', alignSelf: 'center', marginBottom: 16 },
+  handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  headerTitle: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '700' },
-  close: { color: COLORS.textMuted, fontSize: 22, padding: 4 },
   content: { gap: 10 },
-  fieldLabel: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600', marginBottom: 8 },
+  fieldLabel: { fontWeight: '600', marginBottom: 4 },
 });

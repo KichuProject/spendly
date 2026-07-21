@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Animated,
   Modal,
   Platform,
-  ScrollView,
   KeyboardAvoidingView,
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, GLASS, WEB_STYLES } from '../styles/theme';
-import GlassInput from './GlassInput';
-import GlassButton from './GlassButton';
+import ThemedText from './common/ThemedText';
+import ThemedInput from './common/ThemedInput';
+import PrimaryButton from './buttons/PrimaryButton';
+import SecondaryButton from './buttons/SecondaryButton';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES } from '../styles/theme';
 
 export default function EditProfileModal({ visible, user, onSave, onCancel }) {
+  const { colors, radius } = useTheme();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
 
@@ -77,31 +79,32 @@ export default function EditProfileModal({ visible, user, onSave, onCancel }) {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.keyboardView}
         >
-          <Animated.View style={[styles.modal, { transform: [{ scale: scaleAnim }] }]}>
+          <Animated.View style={[styles.modal, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.xl, transform: [{ scale: scaleAnim }] }]}>
             <View style={styles.header}>
-              <Text style={styles.title}>Edit Profile</Text>
-              <Pressable onPress={onCancel} style={[styles.closeBtn, WEB_STYLES.cursor]}>
-                <Ionicons name="close" size={24} color={COLORS.textSecondary} />
+              <ThemedText variant="h2" color="primary">Edit Profile</ThemedText>
+              <Pressable onPress={onCancel} style={[styles.closeBtn, { backgroundColor: colors.surfaceSecondary }, WEB_STYLES.cursor]}>
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </Pressable>
             </View>
 
             <View style={styles.modalContent}>
-              {/* Profile Details Group */}
               <View style={styles.group}>
-                <Text style={styles.groupLabel}>Profile Details</Text>
-                <GlassInput
-                  placeholder="Full Name"
+                <ThemedText variant="caption" color="secondary" style={styles.groupLabel}>Profile Details</ThemedText>
+                <ThemedInput
+                  label="Full Name"
+                  placeholder="Enter full name"
                   value={name}
                   onChangeText={setName}
-                  icon="👤"
+                  icon={<Ionicons name="person" size={20} color={colors.primary} />}
                   error={nameError}
                   autoCapitalize="words"
                 />
-                <GlassInput
-                  placeholder="Email Address"
+                <ThemedInput
+                  label="Email Address"
+                  placeholder="Enter email address"
                   value={email}
                   onChangeText={setEmail}
-                  icon="✉️"
+                  icon={<Ionicons name="mail" size={20} color={colors.accent} />}
                   error={emailError}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -109,8 +112,8 @@ export default function EditProfileModal({ visible, user, onSave, onCancel }) {
               </View>
 
               <View style={styles.buttons}>
-                <GlassButton title="Cancel" variant="ghost" onPress={onCancel} style={{ flex: 1 }} />
-                <GlassButton title="Save Changes" variant="primary" onPress={handleSave} style={{ flex: 1 }} />
+                <SecondaryButton title="Cancel" variant="muted" onPress={onCancel} style={{ flex: 1 }} />
+                <PrimaryButton title="Save Changes" onPress={handleSave} style={{ flex: 1 }} />
               </View>
             </View>
           </Animated.View>
@@ -123,7 +126,7 @@ export default function EditProfileModal({ visible, user, onSave, onCancel }) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 3, 20, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
@@ -134,18 +137,23 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     width: '100%',
-    maxWidth: 440, // Expanded from 420 for slightly wider and more premium look
+    maxWidth: 440,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modal: {
-    ...GLASS.cardElevated,
-    backgroundColor: 'rgba(25, 20, 50, 0.96)',
-    padding: 24, // Expanded padding from 20 to 24 for a more spacious premium layout
+    borderWidth: 1,
+    padding: 24,
     width: '100%',
     ...Platform.select({
-      web: { boxShadow: '0 24px 64px rgba(0,0,0,0.6)' },
-      default: {},
+      web: { boxShadow: '0 24px 64px rgba(0,0,0,0.15)' },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.15,
+        shadowRadius: 24,
+        elevation: 12,
+      },
     }),
   },
   header: {
@@ -154,32 +162,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  title: {
-    color: COLORS.textPrimary,
-    fontSize: 22,
-    fontWeight: '800',
-  },
   closeBtn: {
     padding: 4,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
   },
   modalContent: {
     gap: 16,
   },
   group: {
-    gap: 12,
+    gap: 4,
   },
   groupLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 2,
+    fontWeight: '700',
+    marginBottom: 12,
     marginLeft: 2,
   },
   buttons: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 12, // Spacing between the last input and buttons
+    marginTop: 12,
   },
 });

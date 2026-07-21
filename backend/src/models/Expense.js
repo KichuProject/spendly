@@ -67,7 +67,7 @@ const expenseSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ['solo', 'split', 'friend'],
+      enum: ['solo', 'split', 'friend', 'income'],
       default: 'solo',
     },
 
@@ -83,6 +83,32 @@ const expenseSchema = new mongoose.Schema(
     paymentMethod: {
       type: String,
       default: 'cash',
+    },
+
+    source: {
+      type: String,
+      default: null,
+    },
+
+    account: {
+      type: String,
+      default: 'Cash',
+    },
+
+    recurring: {
+      type: Boolean,
+      default: false,
+    },
+
+    frequency: {
+      type: String,
+      enum: ['one-time', 'daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly', 'custom', null],
+      default: null,
+    },
+
+    attachment: {
+      type: String,
+      default: null,
     },
   },
   {

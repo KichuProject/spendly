@@ -1,32 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import GlassCard from './GlassCard';
+import { View, StyleSheet } from 'react-native';
+import ThemedCard from './common/ThemedCard';
+import ThemedText from './common/ThemedText';
 import CategoryIcon from './CategoryIcon';
-import { COLORS } from '../styles/theme';
+import CountUp from './animations/CountUp';
+import { useTheme } from '../styles/ThemeContext';
 
 export default function SummaryCard({ emoji, label, value, glowColor, style }) {
+  const { colors } = useTheme();
+
   // Derive solid icon color from the transparent glow color for high-contrast crispness
   const iconColor = glowColor 
     ? glowColor.replace(/[\d\.]+\)$/, '1)') // Replaces alpha (e.g. 0.4 or 0.5) with 1
-    : '#FFFFFF';
+    : colors.textPrimary;
+
+  const glowBorder = glowColor ? { borderColor: glowColor, borderWidth: 1.5 } : {};
 
   return (
-    <GlassCard style={[styles.card, style]} glowColor={glowColor}>
+    <ThemedCard style={[styles.card, glowBorder, style]} elevated>
       <CategoryIcon
         emoji={emoji}
         size={24}
         color={iconColor}
         style={styles.emoji}
       />
-      <Text style={styles.value}>{value}</Text>
-      <Text style={styles.label}>{label}</Text>
-    </GlassCard>
+      <CountUp value={value} prefix="₹" variant="body" color="primary" style={styles.value} />
+      <ThemedText variant="caption" color="secondary" style={styles.label}>{label}</ThemedText>
+    </ThemedCard>
   );
 }
 
 const styles = StyleSheet.create({
   card: { width: 140, padding: 16, alignItems: 'center', marginRight: 12 },
   emoji: { marginBottom: 8, height: 26, justifyContent: 'center', alignItems: 'center' },
-  value: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800', marginBottom: 4 },
-  label: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  value: { fontSize: 18, fontWeight: '800', marginBottom: 4, textAlign: 'center' },
+  label: { fontSize: 11, fontWeight: '600', textAlign: 'center' },
 });

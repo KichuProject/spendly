@@ -38,7 +38,7 @@ const saveTransactions = async (transactions, userId) => {
   const dateKeysToUpdate = new Map();
 
   for (const tx of transactions) {
-    const { type, amount, category, description, date } = tx;
+    const { type, amount, category, description, emoji, date } = tx;
     
     const expenseDate = resolveTransactionDate(date);
     const dateKey = toDateKey(expenseDate);
@@ -49,7 +49,7 @@ const saveTransactions = async (transactions, userId) => {
       amount: Number(amount),
       reason: description,
       category: category || 'Other',
-      emoji: '💰', // default
+      emoji: emoji || '💰',
       date: expenseDate,
       dateKey,
       type: 'solo', // Voice transactions are assumed 'solo' initially

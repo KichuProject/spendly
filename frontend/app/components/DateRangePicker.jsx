@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, ScrollView, Animated, Platform } from 'react-native';
-import { COLORS, GLASS, SPACING, SHADOWS, WEB_STYLES } from '../styles/theme';
-import { getCalendarGrid, getDaysInMonth, isFuture, isToday, toDateKey } from '../utils/dateUtils';
-import GlassButton from './GlassButton';
+import { View, Pressable, StyleSheet, Modal, Platform } from 'react-native';
+import ThemedText from './common/ThemedText';
+import PrimaryButton from './buttons/PrimaryButton';
+import SecondaryButton from './buttons/SecondaryButton';
+import { getCalendarGrid, isFuture, isToday, toDateKey } from '../utils/dateUtils';
+import { useTheme } from '../styles/ThemeContext';
+import { WEB_STYLES } from '../styles/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 const DAYS_HEADER = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function DateRangePicker({ visible, onClose, onSelect, singleDate = false, installDate }) {
+  const { colors, radius } = useTheme();
   if (!visible) return null;
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -21,7 +26,6 @@ export default function DateRangePicker({ visible, onClose, onSelect, singleDate
     const d = new Date(year, month, day);
     if (isFuture(d)) return;
 
-    // Do not allow selecting days before the installation date
     if (installDate) {
       const inst = new Date(installDate);
       inst.setHours(0, 0, 0, 0);
@@ -53,15 +57,21 @@ export default function DateRangePicker({ visible, onClose, onSelect, singleDate
     <Modal transparent visible={visible} animationType="slide">
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }]}>
+          <View style={[styles.handle, { backgroundColor: colors.border }]} />
           <View style={styles.header}>
-            <Pressable onPress={prevMonth} style={[WEB_STYLES.cursor]}><Text style={styles.arrow}>‹</Text></Pressable>
-            <Text style={styles.monthTitle}>{monthNames[month]} {year}</Text>
-            <Pressable onPress={nextMonth} style={[WEB_STYLES.cursor]}><Text style={styles.arrow}>›</Text></Pressable>
+            <Pressable onPress={prevMonth} style={[WEB_STYLES.cursor]}>
+              <Ionicons name="chevron-back" size={24} color={colors.textPrimary} style={{ paddingHorizontal: 12 }} />
+            </Pressable>
+            <ThemedText variant="h2" color="primary">{monthNames[month]} {year}</ThemedText>
+            <Pressable onPress={nextMonth} style={[WEB_STYLES.cursor]}>
+              <Ionicons name="chevron-forward" size={24} color={colors.textPrimary} style={{ paddingHorizontal: 12 }} />
+            </Pressable>
           </View>
           <View style={styles.daysHeader}>
-            {DAYS_HEADER.map((d) => <Text key={d} style={styles.dayLabel}>{d}</Text>)}
+            {DAYS_HEADER.map((d) => (
+              <ThemedText key={d} variant="caption" color="secondary" style={styles.dayLabel}>{d}</ThemedText>
+            ))}
           </View>
           {grid.map((week, wi) => (
             <View key={wi} style={styles.weekRow}>
@@ -69,7 +79,6 @@ export default function DateRangePicker({ visible, onClose, onSelect, singleDate
                 const dateObj = day ? new Date(year, month, day) : null;
                 const future = dateObj ? isFuture(dateObj) : false;
 
-                // Dim/disable days before installation
                 let beforeInstall = false;
                 if (dateObj && installDate) {
                   const inst = new Date(installDate);
@@ -91,28 +100,37 @@ export default function DateRangePicker({ visible, onClose, onSelect, singleDate
                     onPress={() => !disabled && handleDayPress(day)}
                     style={[
                       styles.dayCell,
-                      inRange && styles.dayCellRange,
-                      start && styles.dayCellStart,
-                      end && styles.dayCellEnd,
+                      inRange && { backgroundColor: colors.primary + '15' },
+                      start && { backgroundColor: colors.primary, borderTopLeftRadius: 12, borderBottomLeftRadius: 12 },
+                      end && { backgroundColor: colors.primary, borderTopRightRadius: 12, borderBottomRightRadius: 12 },
                       day && !disabled ? WEB_STYLES.cursor : {}
                     ]}
                   >
-                    <Text style={[
-                      styles.dayText,
-                      disabled && styles.dayFuture,
-                      today && styles.dayToday,
-                      inRange && styles.daySelected
-                    ]}>
+                    <ThemedText
+                      variant="bodySmall"
+                      color={start || end ? 'inverse' : disabled ? 'secondary' : today ? 'warning' : 'primary'}
+                      style={[
+                        styles.dayText,
+                        disabled && { opacity: 0.3 },
+                        today && { fontWeight: '800' },
+                        (start || end) && { fontWeight: '700', color: colors.textInverse },
+                      ]}
+                    >
                       {day || ''}
-                    </Text>
+                    </ThemedText>
                   </Pressable>
                 );
               })}
             </View>
           ))}
           <View style={styles.footer}>
-            <GlassButton title="Cancel" variant="ghost" onPress={onClose} style={{ flex: 1 }} />
-            <GlassButton title={singleDate ? 'Select' : 'Apply Range'} variant="primary" onPress={() => { if (startDate) { onSelect({ start: startDate, end: endDate || startDate }); onClose(); } }} disabled={!startDate} style={{ flex: 1 }} />
+            <SecondaryButton title="Cancel" variant="muted" onPress={onClose} style={{ flex: 1 }} />
+            <PrimaryButton 
+              title={singleDate ? 'Select' : 'Apply Range'} 
+              onPress={() => { if (startDate) { onSelect({ start: startDate, end: endDate || startDate }); onClose(); } }} 
+              disabled={!startDate} 
+              style={{ flex: 1 }} 
+            />
           </View>
         </View>
       </View>
@@ -123,7 +141,7 @@ export default function DateRangePicker({ visible, onClose, onSelect, singleDate
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
     ...Platform.select({
       web: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000 },
@@ -131,32 +149,20 @@ const styles = StyleSheet.create({
     }),
   },
   sheet: {
-    backgroundColor: 'rgba(30,25,60,0.97)',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
     padding: 20,
-    borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderWidth: 1,
     borderBottomWidth: 0,
     ...Platform.select({
       web: { maxWidth: 480, width: '100%', alignSelf: 'center' },
       default: {},
     }),
   },
-  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.3)', alignSelf: 'center', marginBottom: 16 },
+  handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  arrow: { color: COLORS.textPrimary, fontSize: 28, paddingHorizontal: 12, fontWeight: '300' },
-  monthTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700' },
   daysHeader: { flexDirection: 'row', marginBottom: 8 },
-  dayLabel: { flex: 1, textAlign: 'center', color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
+  dayLabel: { flex: 1, textAlign: 'center', fontWeight: '600' },
   weekRow: { flexDirection: 'row', marginBottom: 4 },
   dayCell: { flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 12, maxHeight: 44 },
-  dayCellRange: { backgroundColor: 'rgba(124,58,237,0.2)' },
-  dayCellStart: { backgroundColor: '#7C3AED', borderTopLeftRadius: 12, borderBottomLeftRadius: 12 },
-  dayCellEnd: { backgroundColor: '#7C3AED', borderTopRightRadius: 12, borderBottomRightRadius: 12 },
-  dayText: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '500' },
-  dayFuture: { color: COLORS.textMuted, opacity: 0.3 },
-  dayToday: { fontWeight: '800', color: '#FBBF24' },
-  daySelected: { color: '#fff', fontWeight: '700' },
+  dayText: { fontSize: 15, fontWeight: '500' },
   footer: { flexDirection: 'row', gap: 12, marginTop: 16 },
 });
