@@ -11,9 +11,9 @@ const path = require('path');
 // Resolve official app logo from frontend assets
 let logoBase64 = '';
 try {
-  const logoPath = path.resolve(__dirname, '../../../frontend/assets/Logo.png');
-  if (fs.existsSync(logoPath)) {
-    logoBase64 = `data:image/png;base64,${fs.readFileSync(logoPath).toString('base64')}`;
+  const iconPath = path.resolve(__dirname, '../../../frontend/assets/icon.png');
+  if (fs.existsSync(iconPath)) {
+    logoBase64 = `data:image/png;base64,${fs.readFileSync(iconPath).toString('base64')}`;
   }
 } catch (err) {
   console.error('[pdfGenerator] Logo load error:', err);
