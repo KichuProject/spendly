@@ -8,17 +8,17 @@ import { useTheme } from '../styles/ThemeContext';
 
 export default function VersionUpdateModal({ visible, message, platform, apkLink, onCancel }) {
   const { colors, radius } = useTheme();
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const scaleAnim = useRef(new Animated.Value(0.85)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 80, friction: 12 }),
+        Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 90, friction: 12 }),
         Animated.timing(opacityAnim, { toValue: 1, duration: 250, useNativeDriver: true }),
       ]).start();
     } else {
-      scaleAnim.setValue(0.8);
+      scaleAnim.setValue(0.85);
       opacityAnim.setValue(0);
     }
   }, [visible]);
@@ -46,30 +46,31 @@ export default function VersionUpdateModal({ visible, message, platform, apkLink
         <Pressable style={StyleSheet.absoluteFill} onPress={handleCancel} />
         <Animated.View style={[styles.modal, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.xl, transform: [{ scale: scaleAnim }] }]}>
           
-          {/* Header Icon */}
-          <View style={styles.iconContainer}>
-            <View style={[styles.iconBackground, { backgroundColor: colors.surfaceSecondary, borderColor: colors.accent }]}>
-              <Ionicons name="cloud-download-outline" size={32} color={colors.accent} />
-            </View>
+          {/* Top Decorative Icon */}
+          <View style={[styles.iconWrapper, { backgroundColor: colors.accent + '15', borderColor: colors.accent + '30' }]}>
+            <Ionicons name="cloud-download" size={32} color={colors.accent} />
           </View>
 
-          <ThemedText variant="h3" color="primary" style={styles.title}>Update Available</ThemedText>
+          <ThemedText variant="h3" color="primary" style={styles.title}>
+            Update Available
+          </ThemedText>
           
           <ThemedText variant="bodySmall" color="secondary" style={styles.message}>
             {message || "A new version of Spendly is available with amazing new features, performance updates, and bug fixes."}
           </ThemedText>
 
+          {/* Action Buttons */}
           <View style={styles.buttons}>
             <SecondaryButton 
               title="Later" 
               variant="muted" 
               onPress={handleCancel} 
-              style={{ flex: 1 }} 
+              style={styles.buttonFlex} 
             />
             <PrimaryButton 
-              title="Update" 
+              title="Update Now" 
               onPress={handleUpdate} 
-              style={{ flex: 1 }} 
+              style={styles.buttonFlex} 
             />
           </View>
         </Animated.View>
@@ -81,7 +82,7 @@ export default function VersionUpdateModal({ visible, message, platform, apkLink
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -92,52 +93,50 @@ const styles = StyleSheet.create({
   },
   modal: {
     borderWidth: 1,
-    paddingTop: 44,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    padding: 24,
+    paddingTop: 28,
     width: '100%',
-    maxWidth: 340,
+    maxWidth: 360,
     alignItems: 'center',
     ...Platform.select({
-      web: { boxShadow: '0 20px 50px rgba(0,0,0,0.15)' },
+      web: { boxShadow: '0 20px 50px rgba(0,0,0,0.3)' },
       default: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
-        elevation: 10,
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.25,
+        shadowRadius: 24,
+        elevation: 12,
       },
     }),
   },
-  iconContainer: {
-    position: 'absolute',
-    top: -30,
+  iconWrapper: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 60,
-    height: 60,
-  },
-  iconBackground: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 16,
   },
   title: { 
-    marginTop: 12,
     marginBottom: 8,
-    textAlign: 'center'
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '800',
   },
   message: { 
-    lineHeight: 20, 
+    lineHeight: 22, 
     marginBottom: 24,
-    textAlign: 'center'
+    textAlign: 'center',
   },
   buttons: { 
     flexDirection: 'row', 
     gap: 12,
-    width: '100%'
+    width: '100%',
+  },
+  buttonFlex: {
+    flex: 1,
+    width: '100%',
   },
 });
+

@@ -17,8 +17,8 @@ exports.getVersion = async (req, res) => {
       return res.status(200).json({
         success: true,
         data: {
-          latestVersion: '1.0.0',
-          minVersion: '1.0.0',
+          latestVersion: '3.0.0',
+          minVersion: '3.0.0',
           forceUpdate: false,
           message: 'Update your app to the latest version!',
           apkLink: '',

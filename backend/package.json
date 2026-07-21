@@ -1,6 +1,6 @@
 {
   "name": "spend-app-backend",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Production-ready backend for Spend App with Expo notifications and Brevo OTP",
   "main": "server.js",
   "scripts": {
