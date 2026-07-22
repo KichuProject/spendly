@@ -170,9 +170,8 @@ exports.generatePdf = async (req, res) => {
     logger.error(`PDF generation error: ${err.message}`, err);
     return res.status(500).json({
       success: false,
-      message: err.message || 'Failed to generate PDF. Please try again.',
-      error: err.message,
+      message: 'Failed to generate PDF. Please try again.',
+      error:   process.env.NODE_ENV !== 'production' ? err.message : undefined,
     });
   }
 };
-
