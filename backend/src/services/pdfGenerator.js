@@ -632,6 +632,19 @@ async function generatePDF(user, txns, opts = {}) {
   const fs = require('fs');
   const path = require('path');
 
+  console.log("HOME =", process.env.HOME);
+  console.log("PUPPETEER_CACHE_DIR =", process.env.PUPPETEER_CACHE_DIR);
+  console.log("PUPPETEER_EXECUTABLE_PATH =", process.env.PUPPETEER_EXECUTABLE_PATH);
+
+  try {
+    console.log("puppeteer.executablePath() =", puppeteer.executablePath());
+  } catch (e) {
+    console.error("puppeteer.executablePath() error:", e.message);
+  }
+
+  const renderPath = "/opt/render/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome";
+  console.log("Chrome exists at /opt/render path:", fs.existsSync(renderPath));
+
   let browser;
   try {
     const launchOptions = {
@@ -648,6 +661,8 @@ async function generatePDF(user, txns, opts = {}) {
 
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    } else if (fs.existsSync(renderPath)) {
+      launchOptions.executablePath = renderPath;
     } else {
       // 1. Try default puppeteer executable path
       try {
@@ -663,7 +678,8 @@ async function generatePDF(user, txns, opts = {}) {
           path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer'),
           path.join(process.env.USERPROFILE || process.env.HOME || '', '.cache', 'puppeteer'),
           '/opt/render/.cache/puppeteer',
-          '/opt/render/project/src/backend/node_modules/.cache/puppeteer'
+          '/opt/render/project/src/backend/node_modules/.cache/puppeteer',
+          '/opt/render/project/src/node_modules/.cache/puppeteer'
         ];
 
         const findChrome = (dir) => {
@@ -687,6 +703,7 @@ async function generatePDF(user, txns, opts = {}) {
         for (const dir of searchDirs) {
           const found = findChrome(dir);
           if (found) {
+            console.log("Found Chrome binary via search at:", found);
             launchOptions.executablePath = found;
             break;
           }
@@ -694,11 +711,13 @@ async function generatePDF(user, txns, opts = {}) {
       }
     }
 
+    console.log("Launching Puppeteer with executablePath:", launchOptions.executablePath || "default");
     browser = await puppeteer.launch(launchOptions);
   } catch (err) {
     console.error('[pdfGenerator] Puppeteer launch error:', err);
     throw err;
   }
+
 
 
 
