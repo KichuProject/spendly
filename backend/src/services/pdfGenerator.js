@@ -634,6 +634,7 @@ async function generatePDF(user, txns, opts = {}) {
 
   let browser;
   try {
+    // Explicitly configure cache directory to project node_modules location
     const projectCacheDir = path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer');
     if (!process.env.PUPPETEER_CACHE_DIR) {
       process.env.PUPPETEER_CACHE_DIR = projectCacheDir;
@@ -647,20 +648,22 @@ async function generatePDF(user, txns, opts = {}) {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--no-first-run',
+        '--no-default-browser-check',
       ],
     };
 
-    // Auto-detect installed Chrome binary path in project node_modules or system
+    // Use PUPPETEER_EXECUTABLE_PATH if explicitly specified (e.g. system Chrome)
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     } else {
+      // Auto-detect installed Chrome binary path
       try {
-        const executablePath = puppeteer.executablePath();
-        if (executablePath && fs.existsSync(executablePath)) {
-          launchOptions.executablePath = executablePath;
+        const resolvedPath = puppeteer.executablePath();
+        if (resolvedPath && fs.existsSync(resolvedPath)) {
+          launchOptions.executablePath = resolvedPath;
         }
       } catch (e) {
-        // Fallback search inside node_modules/.cache/puppeteer
+        // Fallback search inside PUPPETEER_CACHE_DIR / project node_modules
         const searchBase = process.env.PUPPETEER_CACHE_DIR || projectCacheDir;
         if (fs.existsSync(searchBase)) {
           const findChrome = (dir) => {
@@ -687,7 +690,7 @@ async function generatePDF(user, txns, opts = {}) {
 
     browser = await puppeteer.launch(launchOptions);
   } catch (err) {
-    console.error("Puppeteer launch error:", err);
+    console.error('[pdfGenerator] Puppeteer launch error:', err);
     throw err;
   }
 
