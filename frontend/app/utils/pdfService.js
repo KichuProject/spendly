@@ -199,9 +199,12 @@ export const generateAndDownloadPDF = async (config) => {
       try {
         const j = await response.json();
         if (j.message) errMsg = j.message;
+        if (j.error && j.error !== j.message) errMsg += ` (${j.error})`;
       } catch {}
+      console.error('[pdfService] ❌ PDF Server Error:', errMsg);
       return { success: false, error: errMsg };
     }
+
 
     // Read binary buffer
     const arrayBuffer = await response.arrayBuffer();
