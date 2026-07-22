@@ -639,9 +639,8 @@ async function generatePDF(user, txns, opts = {}) {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
       ],
+
     };
 
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
