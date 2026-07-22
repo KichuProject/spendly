@@ -6,9 +6,12 @@
   "scripts": {
     "install:all": "cd frontend && npm install && cd ../backend && npm install",
     "build:frontend": "cd frontend && npm run build",
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install && cd .. && node scripts/build-merge.js",
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install && npx puppeteer browsers install chrome && cd .. && node scripts/build-merge.js",
+
     "start": "cd backend && npm start",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run web"
+    "dev:frontend": "cd frontend && npm run web",
+    "postinstall": "cd backend && npx puppeteer browsers install chrome"
   }
 }
+
