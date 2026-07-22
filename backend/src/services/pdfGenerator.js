@@ -629,10 +629,21 @@ function buildHTMLTemplate(user, txns, opts) {
 async function generatePDF(user, txns, opts = {}) {
   const html = buildHTMLTemplate(user, txns, opts);
 
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ]
+    });
+  } catch (err) {
+    console.error("Puppeteer launch error:", err);
+    throw err;
+  }
 
   try {
     const page = await browser.newPage();
@@ -646,8 +657,11 @@ async function generatePDF(user, txns, opts = {}) {
 
     return pdfBuffer;
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
+
 
 module.exports = { generatePDF };
