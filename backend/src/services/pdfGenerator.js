@@ -629,8 +629,16 @@ function buildHTMLTemplate(user, txns, opts) {
 async function generatePDF(user, txns, opts = {}) {
   const html = buildHTMLTemplate(user, txns, opts);
 
+  const fs = require('fs');
+  const path = require('path');
+
   let browser;
   try {
+    const projectCacheDir = path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer');
+    if (!process.env.PUPPETEER_CACHE_DIR) {
+      process.env.PUPPETEER_CACHE_DIR = projectCacheDir;
+    }
+
     const launchOptions = {
       headless: true,
       args: [
@@ -640,11 +648,41 @@ async function generatePDF(user, txns, opts = {}) {
         '--disable-gpu',
         '--no-first-run',
       ],
-
     };
 
+    // Auto-detect installed Chrome binary path in project node_modules or system
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    } else {
+      try {
+        const executablePath = puppeteer.executablePath();
+        if (executablePath && fs.existsSync(executablePath)) {
+          launchOptions.executablePath = executablePath;
+        }
+      } catch (e) {
+        // Fallback search inside node_modules/.cache/puppeteer
+        const searchBase = process.env.PUPPETEER_CACHE_DIR || projectCacheDir;
+        if (fs.existsSync(searchBase)) {
+          const findChrome = (dir) => {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+              const fullPath = path.join(dir, file);
+              const stat = fs.statSync(fullPath);
+              if (stat.isDirectory()) {
+                const found = findChrome(fullPath);
+                if (found) return found;
+              } else if (file === 'chrome' || file === 'chrome.exe') {
+                return fullPath;
+              }
+            }
+            return null;
+          };
+          const foundChrome = findChrome(searchBase);
+          if (foundChrome) {
+            launchOptions.executablePath = foundChrome;
+          }
+        }
+      }
     }
 
     browser = await puppeteer.launch(launchOptions);
@@ -652,6 +690,7 @@ async function generatePDF(user, txns, opts = {}) {
     console.error("Puppeteer launch error:", err);
     throw err;
   }
+
 
 
   try {
