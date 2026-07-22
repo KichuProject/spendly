@@ -629,24 +629,15 @@ function buildHTMLTemplate(user, txns, opts) {
 async function generatePDF(user, txns, opts = {}) {
   const html = buildHTMLTemplate(user, txns, opts);
 
-  const fs = require('fs');
-  const path = require('path');
-
-  console.log("HOME =", process.env.HOME);
-  console.log("PUPPETEER_CACHE_DIR =", process.env.PUPPETEER_CACHE_DIR);
-  console.log("PUPPETEER_EXECUTABLE_PATH =", process.env.PUPPETEER_EXECUTABLE_PATH);
-
-  try {
-    console.log("puppeteer.executablePath() =", puppeteer.executablePath());
-  } catch (e) {
-    console.error("puppeteer.executablePath() error:", e.message);
-  }
-
-  const renderPath = "/opt/render/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome";
-  console.log("Chrome exists at /opt/render path:", fs.existsSync(renderPath));
-
   let browser;
   try {
+    let executablePath;
+    try {
+      executablePath = puppeteer.executablePath();
+    } catch (e) {
+      console.warn('[pdfGenerator] puppeteer.executablePath() warning:', e.message);
+    }
+
     const launchOptions = {
       headless: true,
       args: [
@@ -654,69 +645,21 @@ async function generatePDF(user, txns, opts = {}) {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--no-first-run',
-        '--no-default-browser-check',
       ],
     };
 
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-    } else if (fs.existsSync(renderPath)) {
-      launchOptions.executablePath = renderPath;
-    } else {
-      // 1. Try default puppeteer executable path
-      try {
-        const pPath = puppeteer.executablePath();
-        if (pPath && typeof pPath === 'string' && fs.existsSync(pPath)) {
-          launchOptions.executablePath = pPath;
-        }
-      } catch {}
-
-      // 2. If not found, search in project & user cache directories
-      if (!launchOptions.executablePath) {
-        const searchDirs = [
-          path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer'),
-          path.join(process.env.USERPROFILE || process.env.HOME || '', '.cache', 'puppeteer'),
-          '/opt/render/.cache/puppeteer',
-          '/opt/render/project/src/backend/node_modules/.cache/puppeteer',
-          '/opt/render/project/src/node_modules/.cache/puppeteer'
-        ];
-
-        const findChrome = (dir) => {
-          if (!dir || typeof dir !== 'string' || !fs.existsSync(dir)) return null;
-          try {
-            const files = fs.readdirSync(dir);
-            for (const file of files) {
-              const fullPath = path.join(dir, file);
-              const stat = fs.statSync(fullPath);
-              if (stat.isDirectory()) {
-                const found = findChrome(fullPath);
-                if (found) return found;
-              } else if (file === 'chrome' || file === 'chrome.exe') {
-                return fullPath;
-              }
-            }
-          } catch {}
-          return null;
-        };
-
-        for (const dir of searchDirs) {
-          const found = findChrome(dir);
-          if (found) {
-            console.log("Found Chrome binary via search at:", found);
-            launchOptions.executablePath = found;
-            break;
-          }
-        }
-      }
+    } else if (executablePath) {
+      launchOptions.executablePath = executablePath;
     }
 
-    console.log("Launching Puppeteer with executablePath:", launchOptions.executablePath || "default");
     browser = await puppeteer.launch(launchOptions);
   } catch (err) {
     console.error('[pdfGenerator] Puppeteer launch error:', err);
     throw err;
   }
+
 
 
 

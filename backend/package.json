@@ -9,7 +9,7 @@
     "test": "jest --coverage",
     "lint": "eslint src",
     "seed": "node test/seedData.js",
-    "postinstall": "puppeteer browsers install chrome"
+    "postinstall": "npx puppeteer browsers install chrome"
   },
 
   "keywords": [
@@ -33,7 +33,8 @@
     "mongoose": "^7.8.9",
     "node-cron": "^3.0.2",
     "pdfkit": "^0.19.1",
-    "puppeteer": "^25.3.0",
+    "puppeteer": "^24.16.2",
+
     "uuid": "^9.0.1"
   },
   "devDependencies": {
