@@ -634,12 +634,6 @@ async function generatePDF(user, txns, opts = {}) {
 
   let browser;
   try {
-    // Explicitly configure cache directory to project node_modules location
-    const projectCacheDir = path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer');
-    if (!process.env.PUPPETEER_CACHE_DIR) {
-      process.env.PUPPETEER_CACHE_DIR = projectCacheDir;
-    }
-
     const launchOptions = {
       headless: true,
       args: [
@@ -652,21 +646,29 @@ async function generatePDF(user, txns, opts = {}) {
       ],
     };
 
-    // Use PUPPETEER_EXECUTABLE_PATH if explicitly specified (e.g. system Chrome)
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
       launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
     } else {
-      // Auto-detect installed Chrome binary path
+      // 1. Try default puppeteer executable path
       try {
-        const resolvedPath = puppeteer.executablePath();
-        if (resolvedPath && fs.existsSync(resolvedPath)) {
-          launchOptions.executablePath = resolvedPath;
+        const pPath = puppeteer.executablePath();
+        if (pPath && typeof pPath === 'string' && fs.existsSync(pPath)) {
+          launchOptions.executablePath = pPath;
         }
-      } catch (e) {
-        // Fallback search inside PUPPETEER_CACHE_DIR / project node_modules
-        const searchBase = process.env.PUPPETEER_CACHE_DIR || projectCacheDir;
-        if (fs.existsSync(searchBase)) {
-          const findChrome = (dir) => {
+      } catch {}
+
+      // 2. If not found, search in project & user cache directories
+      if (!launchOptions.executablePath) {
+        const searchDirs = [
+          path.join(__dirname, '..', '..', 'node_modules', '.cache', 'puppeteer'),
+          path.join(process.env.USERPROFILE || process.env.HOME || '', '.cache', 'puppeteer'),
+          '/opt/render/.cache/puppeteer',
+          '/opt/render/project/src/backend/node_modules/.cache/puppeteer'
+        ];
+
+        const findChrome = (dir) => {
+          if (!dir || typeof dir !== 'string' || !fs.existsSync(dir)) return null;
+          try {
             const files = fs.readdirSync(dir);
             for (const file of files) {
               const fullPath = path.join(dir, file);
@@ -678,11 +680,15 @@ async function generatePDF(user, txns, opts = {}) {
                 return fullPath;
               }
             }
-            return null;
-          };
-          const foundChrome = findChrome(searchBase);
-          if (foundChrome) {
-            launchOptions.executablePath = foundChrome;
+          } catch {}
+          return null;
+        };
+
+        for (const dir of searchDirs) {
+          const found = findChrome(dir);
+          if (found) {
+            launchOptions.executablePath = found;
+            break;
           }
         }
       }
@@ -693,6 +699,7 @@ async function generatePDF(user, txns, opts = {}) {
     console.error('[pdfGenerator] Puppeteer launch error:', err);
     throw err;
   }
+
 
 
 
