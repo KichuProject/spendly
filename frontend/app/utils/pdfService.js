@@ -8,6 +8,10 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+
+
 
 // ─────────────────────────────────────────
 // Resolve base API URL (mirrors apiClient.js)
@@ -70,18 +74,48 @@ const triggerWebDownload = (buffer, filename) => {
 // Native save + share helper
 // ─────────────────────────────────────────
 
-const saveAndShareNative = async (buffer, filename) => {
-  // Dynamic import to avoid loading native modules on web
-  const FileSystem = await import('expo-file-system');
-  const Sharing    = await import('expo-sharing');
+// ArrayBuffer to base64 helper for native environments without global Buffer
+const arrayBufferToBase64 = (buffer) => {
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(buffer).toString('base64');
+  }
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  if (typeof btoa !== 'undefined') {
+    return btoa(binary);
+  }
+  // Fallback Uint8Array to base64 mapping
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let base64 = '';
+  for (let i = 0; i < len; i += 3) {
+    const b1 = bytes[i];
+    const b2 = i + 1 < len ? bytes[i + 1] : 0;
+    const b3 = i + 2 < len ? bytes[i + 2] : 0;
 
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+    const c4 = b3 & 63;
+
+    base64 += chars[c1] + chars[c2] + (i + 1 < len ? chars[c3] : '=') + (i + 2 < len ? chars[c4] : '=');
+  }
+  return base64;
+};
+
+const saveAndShareNative = async (buffer, filename) => {
   const fileUri = `${FileSystem.documentDirectory}${filename}`;
 
-  // Convert ArrayBuffer to base64 string
-  const base64 = Buffer.from(buffer).toString('base64');
+  // Convert ArrayBuffer to base64 string safely across all JS engines
+  const base64 = arrayBufferToBase64(buffer);
+  
   await FileSystem.writeAsStringAsync(fileUri, base64, {
-    encoding: FileSystem.EncodingType.Base64,
+    encoding: FileSystem.EncodingType ? FileSystem.EncodingType.Base64 : 'base64',
   });
+
 
   const canShare = await Sharing.isAvailableAsync();
   if (canShare) {
@@ -94,6 +128,7 @@ const saveAndShareNative = async (buffer, filename) => {
 
   return fileUri;
 };
+
 
 // ─────────────────────────────────────────
 // Main: generate and download PDF

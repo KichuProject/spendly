@@ -233,7 +233,7 @@ const darkColors = {
 
 const fontFamily = (native) => Platform.select({
   web: `"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
-  default: native,
+  default: undefined,
 });
 
 export const TYPOGRAPHY = {

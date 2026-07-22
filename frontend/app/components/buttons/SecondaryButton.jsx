@@ -21,7 +21,7 @@ export default function SecondaryButton({
   const colorMap = {
     primary: colors.primary,
     danger: colors.danger,
-    muted: colors.textSecondary,
+    muted: colors.textPrimary || '#FFFFFF',
   };
 
   const sizeMap = {
@@ -30,12 +30,19 @@ export default function SecondaryButton({
     lg: { paddingVertical: 17, paddingHorizontal: 30, ...typography.button },
   };
 
-  const borderColor = disabled ? colors.textMuted : colorMap[variant];
-  const textColor = disabled ? colors.textMuted : colorMap[variant];
+  const styleBorderColor = style && (style.borderColor || (Array.isArray(style) && style.find(s => s && s.borderColor)?.borderColor));
+  const styleTextColor = style && (style.color || (Array.isArray(style) && style.find(s => s && s.color)?.color));
+  
+  const resolvedColor = colorMap[variant] || colors.primary || '#3B82F6';
+  const borderColor = disabled ? (colors.border || '#404040') : (styleBorderColor || resolvedColor);
+  const textColor = disabled ? (colors.textMuted || '#A0A0A4') : (styleTextColor || resolvedColor);
   const sizeStyle = sizeMap[size] || sizeMap.md;
 
+
   return (
-    <Animated.View style={[{ flex: style?.flex, width: style?.width }, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View style={[{ flex: style?.flex, width: style?.width }, style && style.margin ? { margin: style.margin, marginTop: style.marginTop, marginBottom: style.marginBottom, marginLeft: style.marginLeft, marginRight: style.marginRight } : { marginBottom: 16 }, { transform: [{ scale: scaleAnim }] }]}>
+
+
       <Pressable
         onPress={disabled || loading ? undefined : onPress}
         onPressIn={() => Animated.spring(scaleAnim, { toValue: 0.96, useNativeDriver: true, damping: 20, stiffness: 400 }).start()}
@@ -47,9 +54,12 @@ export default function SecondaryButton({
             borderRadius: radius.md,
             paddingVertical: sizeStyle.paddingVertical,
             paddingHorizontal: sizeStyle.paddingHorizontal,
-            opacity: disabled ? 0.5 : 1,
+            opacity: disabled ? 0.7 : 1,
           },
           style,
+          { borderColor }, // Override style's border to avoid double application
+          { minHeight: size === 'sm' ? 36 : size === 'lg' ? 56 : 48 }, // Enforce minHeight for phone views
+
         ]}
         {...props}
       >
@@ -58,9 +68,10 @@ export default function SecondaryButton({
         ) : (
           <>
             {icon && icon}
-            <Text style={[styles.text, { color: textColor, fontSize: sizeStyle.fontSize, fontWeight: sizeStyle.fontWeight }, icon && { marginLeft: 8 }, textStyle]}>
+            <Text style={[styles.text, { color: textColor, fontSize: sizeStyle.fontSize || 15, fontWeight: sizeStyle.fontWeight || '700' }, { paddingTop: 0, paddingBottom: 3 }, icon && { marginLeft: 8 }, textStyle]}>
               {title}
             </Text>
+
           </>
         )}
       </Pressable>
@@ -75,8 +86,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1.5,
     backgroundColor: 'transparent',
+    width: '100%',
   },
   text: {
     letterSpacing: 0.3,
   },
 });
+

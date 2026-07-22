@@ -203,7 +203,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.dismissArea} onPress={onClose} />
         <View style={[styles.sheet, { backgroundColor: colors.surface, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg }]}>
@@ -271,7 +271,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
               <ThemedText variant="bodyBold" color="primary">{category.name}</ThemedText>
             </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 16, paddingRight: 48 }}>
               {INCOME_CATEGORIES.map((cat) => {
                 const isActive = category.name === cat.name;
                 return (
@@ -299,7 +299,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
 
             {/* Account Selector */}
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Account / Destination</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 16, paddingRight: 48 }}>
               {ACCOUNTS.map((acc) => {
                 const isActive = account === acc;
                 return (
@@ -326,7 +326,8 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
 
             {/* Source Selector */}
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Income Source</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 12 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 12, paddingRight: 48 }}>
+
               {INCOME_SOURCES.map((src) => {
                 const isActive = source === src;
                 return (
@@ -414,7 +415,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
             {recurring && (
               <View style={{ marginBottom: 16 }}>
                 <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Repeat Interval</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll} contentContainerStyle={{ gap: 8, paddingBottom: 12, paddingRight: 48 }}>
                   {FREQUENCIES.map((f) => {
                     const isActive = frequency === f.value;
                     return (
@@ -440,6 +441,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
                 </ScrollView>
               </View>
             )}
+
 
             <View style={{ height: 40 }} />
           </ScrollView>
@@ -533,7 +535,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     ...Platform.select({
       web: { maxHeight: 420 },
-      default: {},
+      default: { maxHeight: 420 },
     }),
   },
   fieldLabel: {
@@ -589,9 +591,11 @@ const styles = StyleSheet.create({
   },
   horizontalScroll: {
     marginHorizontal: -24,
-    paddingHorizontal: 24,
+    paddingLeft: 24,
+    paddingRight: 24,
     marginBottom: 16,
   },
+
   categoryCard: {
     flexDirection: 'row',
     alignItems: 'center',

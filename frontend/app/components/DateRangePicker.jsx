@@ -12,12 +12,13 @@ const DAYS_HEADER = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function DateRangePicker({ visible, onClose, onSelect, singleDate = false, installDate }) {
   const { colors, radius } = useTheme();
-  if (!visible) return null;
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  if (!visible) return null;
 
   const grid = getCalendarGrid(year, month);
 

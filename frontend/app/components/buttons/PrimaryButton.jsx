@@ -31,7 +31,10 @@ export default function PrimaryButton({
     lg: { paddingVertical: 18, paddingHorizontal: 32, ...typography.button, fontSize: 17 },
   };
 
-  const bgColor = disabled ? colors.textMuted : colorMap[variant];
+  const styleBgColor = style && (style.backgroundColor || (Array.isArray(style) && style.find(s => s && s.backgroundColor)?.backgroundColor));
+  const bgColor = disabled 
+    ? (colors.surfaceSecondary || '#2A2A2D') 
+    : (styleBgColor || colorMap[variant] || colors.primary);
   const sizeStyle = sizeMap[size] || sizeMap.md;
 
   const handlePressIn = () => {
@@ -41,7 +44,6 @@ export default function PrimaryButton({
       damping: 20,
       stiffness: 400,
     }).start();
-    // Haptic feedback
     if (Platform.OS !== 'web') {
       try { require('expo-haptics').impactAsync('light'); } catch (e) {}
     }
@@ -56,8 +58,14 @@ export default function PrimaryButton({
     }).start();
   };
 
+  const textColor = disabled 
+    ? (colors.textMuted || '#A0A0A4') 
+    : '#FFFFFF';
+
   return (
-    <Animated.View style={[{ flex: style?.flex, width: style?.width }, { transform: [{ scale: scaleAnim }] }, elevation.sm]}>
+    <Animated.View style={[{ flex: style?.flex, width: style?.width }, style && style.margin ? { margin: style.margin, marginTop: style.marginTop, marginBottom: style.marginBottom, marginLeft: style.marginLeft, marginRight: style.marginRight } : { marginBottom: 16 }, { transform: [{ scale: scaleAnim }] }, elevation.sm]}>
+
+
       <Pressable
         onPress={disabled || loading ? undefined : onPress}
         onPressIn={handlePressIn}
@@ -69,28 +77,33 @@ export default function PrimaryButton({
             borderRadius: radius.md,
             paddingVertical: sizeStyle.paddingVertical,
             paddingHorizontal: sizeStyle.paddingHorizontal,
-            opacity: disabled ? 0.5 : 1,
+            opacity: disabled ? 0.7 : 1,
           },
           style,
+          { backgroundColor: bgColor }, // Override style's background to avoid double application
+          { minHeight: size === 'sm' ? 36 : size === 'lg' ? 56 : 48 }, // Enforce minHeight for phone views
         ]}
         {...props}
       >
+
         {loading ? (
-          <ActivityIndicator color={colors.textInverse} size="small" />
+          <ActivityIndicator color={textColor} size="small" />
         ) : (
           <>
             {icon && icon}
             <Text
               style={[
                 styles.text,
-                { fontSize: sizeStyle.fontSize, fontWeight: sizeStyle.fontWeight, fontFamily: sizeStyle.fontFamily },
-                { color: colors.textInverse },
+                { fontSize: sizeStyle.fontSize || 15, fontWeight: sizeStyle.fontWeight || '700' },
+                { color: textColor },
+                { paddingTop: 0, paddingBottom: 3 }, // Shift text upwards inside button
                 icon && { marginLeft: 8 },
                 textStyle,
               ]}
             >
               {title}
             </Text>
+
           </>
         )}
       </Pressable>
@@ -103,8 +116,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
   },
   text: {
     letterSpacing: 0.3,
   },
 });
+

@@ -186,17 +186,18 @@ export default function ExportExpensesScreen() {
     const sizeEstimateKb = Math.max(12, Math.round(totalCount * 1.8 + 8));
     const pageEstimate = Math.max(1, Math.ceil(totalCount / 18) + (includeSummaryPage ? 1 : 0));
 
-    // Formatted date string (e.g. "01 May - 31 May")
-    const startStr = startDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
-    const endStr = endDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
+    // Formatted date string (e.g. "21 Jul 2026 - 21 Jul 2026")
+    const startCompact = startDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+    const endCompact = endDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
 
     return {
       totalCount,
       sizeEstimate: `${sizeEstimateKb} KB`,
       pageEstimate,
-      dateShortText: `${startStr} - ${endStr}`,
-      dateLongText: `${formatDate(startDate)} - ${formatDate(endDate)}`,
+      dateShortText: `${startCompact} - ${endCompact}`,
+      dateLongText: `${startCompact} - ${endCompact}`,
     };
+
   }, [filteredItems, startDate, endDate, includeSummaryPage]);
 
   const handleNext = () => {
@@ -526,7 +527,7 @@ export default function ExportExpensesScreen() {
             </View>
             <View style={styles.summaryGridItem}>
               <Text style={[styles.summaryGridLabel, { color: colors.textTertiary }]}>Date Range</Text>
-              <Text style={[styles.summaryGridValue, { color: colors.primary }]}>{summaryInfo.dateShortText}</Text>
+              <Text style={[styles.summaryGridValue, { color: colors.primary, paddingRight: 16 }]} numberOfLines={1}>{summaryInfo.dateShortText}</Text>
             </View>
             <View style={styles.summaryGridItem}>
               <Text style={[styles.summaryGridLabel, { color: colors.textTertiary }]}>Records</Text>
@@ -537,6 +538,7 @@ export default function ExportExpensesScreen() {
               <Text style={[styles.summaryGridValue, { color: colors.primary }]}>PDF</Text>
             </View>
           </View>
+
 
           {/* Procced Button */}
           <View style={styles.actionContainer}>
@@ -572,9 +574,17 @@ export default function ExportExpensesScreen() {
 
           <ThemedCard style={[styles.summaryCard, { borderColor: colors.border }]} elevated>
             <View style={styles.summaryItemRow}>
-              <ThemedText variant="bodySmall" color="secondary">Date Range</ThemedText>
-              <ThemedText variant="bodyBold" color="primary">{summaryInfo.dateLongText}</ThemedText>
+              <ThemedText variant="bodySmall" color="secondary" style={{ flexShrink: 0, marginRight: 8 }}>Date Range</ThemedText>
+              <ThemedText variant="bodyBold" color="primary" style={{ flex: 1, textAlign: 'right', fontSize: 13, paddingRight: 4 }} numberOfLines={1}>
+                {summaryInfo.dateLongText}
+              </ThemedText>
             </View>
+
+
+
+
+
+
             <View style={styles.summaryItemRow}>
               <ThemedText variant="bodySmall" color="secondary">Estimated Pages</ThemedText>
               <ThemedText variant="bodyBold" color="primary">{summaryInfo.pageEstimate}</ThemedText>

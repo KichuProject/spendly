@@ -256,7 +256,7 @@ export default function SettingsScreen() {
         <ThemedCard style={styles.section} padding={0}>
           <SettingRow
             icon={<Ionicons name="share-outline" size={20} color={colors.accent} />}
-            label="Export Expenses (PDF)"
+            label="Export Expenses"
             right={<Ionicons name="chevron-forward" size={18} color={colors.textMuted} />}
             onPress={() => navigation.navigate('ExportExpenses')}
           />
