@@ -1822,10 +1822,10 @@
       render3DBg();
     })();
 
-    // Fetch dynamic APK download link from DB
+    // Fetch dynamic APK download link & version from DB (MongoDB Atlas)
     async function fetchApkDownloadLink() {
       try {
-        const backendOrigin = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
+        const backendOrigin = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1') || window.location.protocol === 'file:'
           ? 'http://localhost:5000'
           : window.location.origin;
 
@@ -1833,19 +1833,35 @@
         if (!response.ok) throw new Error('Network response not ok');
         
         const payload = await response.json();
-        if (payload.success && payload.data && payload.data.apkLink) {
+        if (payload.success && payload.data) {
           const latestVersion = payload.data.latestVersion || '3.0.0';
+          const apkLink = payload.data.apkLink;
           
-          document.querySelectorAll('.dl-link').forEach(el => {
-            el.href = '/download.html';
+          // Dynamically update all version badges from DB
+          document.querySelectorAll('.version-badge').forEach(el => {
+            el.innerText = `v${latestVersion}`;
           });
 
+          // Dynamically update hero tag text from DB
+          document.querySelectorAll('.hero-tag span').forEach(el => {
+            el.innerText = `Spendly v${latestVersion} Release — Voice Finance & Analytics`;
+          });
+
+          // Dynamically update download links from DB
+          document.querySelectorAll('.dl-link').forEach(el => {
+            if (apkLink) el.href = apkLink;
+            else el.href = '/download.html';
+          });
+
+          // Dynamically update footer APK filename from DB
           document.querySelectorAll('.apk-name').forEach(el => {
             el.innerText = `Spendly-v${latestVersion}.apk`;
           });
+
+          console.log(`✅ Loaded version v${latestVersion} from DB`);
         }
       } catch (err) {
-        console.warn('Fallback to default v3.0.0 links');
+        console.warn('Fallback to default v3.0.0 links:', err);
       }
     }
 
