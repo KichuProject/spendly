@@ -96,7 +96,7 @@ export default function PrimaryButton({
                 styles.text,
                 { fontSize: sizeStyle.fontSize || 15, fontWeight: sizeStyle.fontWeight || '700' },
                 { color: textColor },
-                { paddingTop: 0, paddingBottom: 3 }, // Shift text upwards inside button
+                { includeFontPadding: false },
                 icon && { marginLeft: 8 },
                 textStyle,
               ]}

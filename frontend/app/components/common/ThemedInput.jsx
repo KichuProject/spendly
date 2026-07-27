@@ -1,6 +1,7 @@
 // ThemedInput — Clean input with floating label and focus animation
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, Text, Animated, StyleSheet, Platform } from 'react-native';
+import { View, TextInput, Text, Animated, StyleSheet, Platform, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../styles/ThemeContext';
 
 export default function ThemedInput({
@@ -23,10 +24,15 @@ export default function ThemedInput({
 }) {
   const { colors, radius, typography, spacing } = useTheme();
   const [focused, setFocused] = useState(false);
+  const [isSecure, setIsSecure] = useState(secureTextEntry);
   const borderAnim = useRef(new Animated.Value(0)).current;
   const labelAnim = useRef(new Animated.Value(value ? 1 : 0)).current;
 
   const hasValue = value && value.length > 0;
+
+  useEffect(() => {
+    setIsSecure(secureTextEntry);
+  }, [secureTextEntry]);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -43,6 +49,10 @@ export default function ThemedInput({
             -webkit-box-shadow: 0 0 0 1000px ${colors.surface} inset !important;
             -webkit-text-fill-color: ${colors.textPrimary} !important;
             transition: background-color 5000s ease-in-out 0s;
+          }
+          input::-ms-reveal,
+          input::-ms-clear {
+            display: none;
           }
         `));
         document.head.appendChild(style);
@@ -76,10 +86,21 @@ export default function ThemedInput({
     outputRange: [16, -10],
   });
 
+  const labelLeft = labelAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [icon ? 44 : 14, 12],
+  });
+
   const labelSize = labelAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [16, 12],
   });
+
+  const renderRight = right || (secureTextEntry ? (
+    <Pressable onPress={() => setIsSecure(!isSecure)} hitSlop={8} style={{ padding: 2 }}>
+      <Ionicons name={isSecure ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
+    </Pressable>
+  ) : null);
 
   return (
     <View style={[styles.wrapper, style]}>
@@ -99,6 +120,7 @@ export default function ThemedInput({
               styles.floatingLabel,
               {
                 top: labelTop,
+                left: labelLeft,
                 fontSize: labelSize,
                 color: focused ? colors.primary : colors.textTertiary,
                 backgroundColor: colors.surface,
@@ -118,7 +140,7 @@ export default function ThemedInput({
             onBlur={() => setFocused(false)}
             placeholder={focused || !label ? placeholder : ''}
             placeholderTextColor={colors.textMuted}
-            secureTextEntry={secureTextEntry}
+            secureTextEntry={isSecure}
             keyboardType={keyboardType}
             autoCapitalize={autoCapitalize}
             multiline={multiline}
@@ -137,7 +159,7 @@ export default function ThemedInput({
             ]}
             {...props}
           />
-          {Boolean(right) && <View style={styles.iconRight}>{right}</View>}
+          {Boolean(renderRight) && <View style={styles.iconRight}>{renderRight}</View>}
         </View>
       </Animated.View>
 

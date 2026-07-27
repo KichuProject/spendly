@@ -209,181 +209,52 @@ const handleForgotPassword = async (req, res, next) => {
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body {
-                  margin: 0;
-                  padding: 0;
-                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                  background: #0F0C29;
-                  background-image: linear-gradient(135deg, #0F0C29 0%, #1D1845 50%, #0F0C29 100%);
-                  min-height: 100vh;
-                }
-                .container {
-                  max-width: 600px;
-                  margin: 40px auto;
-                  padding: 0 20px;
-                }
-                .card {
-                  background: #151138;
-                  border: 1.5px solid rgba(255, 255, 255, 0.12);
-                  border-radius: 24px;
-                  padding: 45px 35px;
-                  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-                }
-                .branding {
-                  text-align: center;
-                  margin-bottom: 30px;
-                }
-                .logo-circle {
-                  display: inline-block;
-                  width: 72px;
-                  height: 72px;
-                  border-radius: 36px;
-                  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #0EA5E9 100%);
-                  line-height: 72px;
-                  text-align: center;
-                  font-size: 32px;
-                  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.45);
-                  border: 2px solid rgba(255, 255, 255, 0.15);
-                }
-                .app-name {
-                  color: #FFFFFF;
-                  font-size: 28px;
-                  font-weight: 800;
-                  letter-spacing: -0.5px;
-                  margin-top: 10px;
-                }
-                .tagline {
-                  color: rgba(255, 255, 255, 0.5);
-                  font-size: 13px;
-                  font-weight: 500;
-                  letter-spacing: 0.5px;
-                  margin-top: 4px;
-                }
-                h1 {
-                  color: #FFFFFF;
-                  text-align: center;
-                  margin: 0 0 15px 0;
-                  font-size: 24px;
-                  font-weight: 700;
-                }
-                p {
-                  color: rgba(255, 255, 255, 0.8);
-                  font-size: 15px;
-                  line-height: 1.6;
-                  margin: 0 0 15px 0;
-                }
-                .button-container {
-                  text-align: center;
-                  margin: 35px 0;
-                }
-                .reset-button {
-                  display: inline-block;
-                  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #0EA5E9 100%);
-                  color: white;
-                  padding: 16px 45px;
-                  border-radius: 16px;
-                  text-decoration: none;
-                  font-weight: 700;
-                  font-size: 16px;
-                  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
-                  border: 1px solid rgba(255, 255, 255, 0.1);
-                  letter-spacing: 0.3px;
-                }
-                .info-box {
-                  background: rgba(255, 255, 255, 0.03);
-                  border: 1px solid rgba(255, 255, 255, 0.08);
-                  border-left: 4px solid #7C3AED;
-                  border-radius: 12px;
-                  padding: 16px;
-                  margin: 25px 0;
-                }
-                .info-box p {
-                  margin: 0;
-                }
-                .divider {
-                  height: 1px;
-                  background: rgba(255, 255, 255, 0.1);
-                  margin: 30px 0;
-                }
-                .footer {
-                  text-align: center;
-                  padding-top: 10px;
-                }
-                .footer p {
-                  font-size: 12px;
-                  color: rgba(255, 255, 255, 0.4);
-                  margin: 4px 0;
-                }
-                .warning {
-                  color: #FCA5A5;
-                  font-size: 13px;
-                  margin-top: 8px;
-                }
-                .link-code {
-                  background: rgba(0, 0, 0, 0.25);
-                  border: 1.5px solid rgba(255, 255, 255, 0.1);
-                  padding: 10px 14px;
-                  border-radius: 10px;
-                  color: #A78BFA;
-                  font-family: monospace;
-                  font-size: 12px;
-                  word-break: break-all;
-                  margin-top: 8px;
-                  display: block;
-                }
-              </style>
             </head>
-            <body>
-              <div class="container">
-                <div class="card">
-                  <!-- Branding Section -->
-                  <div class="branding">
-                    <div class="logo-circle">💎</div>
-                    <div class="app-name">Spendly</div>
-                    <div class="tagline">Track. Split. Settle.</div>
-                  </div>
-
-                  <!-- Header -->
-                  <h1>🔐 Reset Your Password</h1>
-
-                  <!-- Main Content -->
-                  <p>Hi <strong>${user.name}</strong>,</p>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #000000; color: #FFFFFF; min-height: 100vh;">
+              <div style="max-width: 520px; margin: 40px auto; padding: 0 20px;">
+                <!-- Luxury OLED Card -->
+                <div style="background: #0A0A0E; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; padding: 44px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);">
                   
-                  <p>We received a request to reset your password for your Spendly account. If you didn't make this request, you can safely ignore this email.</p>
-
-                  <!-- Reset Button -->
-                  <div class="button-container">
-                    <a href="${resetLink}" class="reset-button">Reset Password →</a>
+                  <!-- Brand Header -->
+                  <div style="text-align: center; margin-bottom: 28px;">
+                    <div style="display: inline-block; width: 60px; height: 60px; border-radius: 20px; background: linear-gradient(135deg, #059669 0%, #0EA5E9 50%, #6366F1 100%); line-height: 60px; font-size: 28px; color: #FFFFFF; box-shadow: 0 0 35px rgba(14, 165, 233, 0.4);">🔑</div>
+                    <h1 style="color: #FFFFFF; margin: 16px 0 4px 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Reset Your Password</h1>
+                    <p style="color: #A1A1AA; font-size: 14px; margin: 0;">Spendly Security Request</p>
                   </div>
 
-                  <!-- Or copy link -->
-                  <p style="font-size: 12px; color: rgba(255, 255, 255, 0.45); text-align: center; margin-top: 20px;">
-                    Or copy and paste this link in your browser:
-                    <span class="link-code">${resetLink}</span>
+                  <p style="color: #E4E4E7; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                    Hi <strong style="color: #FFFFFF;">${user.name}</strong>, we received a request to reset your Spendly account password. Click the button below to set a new password:
                   </p>
 
-                  <!-- Info Box -->
-                  <div class="info-box">
-                    <p>⏱️ <strong>Link expires in:</strong> 15 minutes</p>
-                    <p class="warning">⚠️ This link can only be used once</p>
+                  <!-- Reset CTA Button -->
+                  <div style="text-align: center; margin-bottom: 28px;">
+                    <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #0EA5E9 50%, #6366F1 100%); color: #FFFFFF; text-decoration: none; padding: 16px 36px; border-radius: 16px; font-weight: 800; font-size: 15px; box-shadow: 0 0 35px rgba(14, 165, 233, 0.4); letter-spacing: 0.3px;">
+                      Reset Password Now →
+                    </a>
                   </div>
 
-                  <!-- Security Info -->
-                  <div class="info-box" style="border-left-color: #EC4899;">
-                    <p>🔒 <strong>Security Tips:</strong></p>
-                    <p style="margin-top: 6px; font-size: 13px;">• Never share this reset link with anyone</p>
-                    <p style="font-size: 13px;">• Spendly support will never ask for your password via email</p>
-                    <p style="font-size: 13px;">• If you did not trigger this request, please update your security settings immediately</p>
+                  <!-- Fallback Link -->
+                  <div style="background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 14px; margin-bottom: 24px; font-size: 12px; color: #A1A1AA; word-break: break-all;">
+                    Or copy & paste this direct URL in your browser:
+                    <div style="color: #38BDF8; font-family: monospace; font-size: 11px; margin-top: 6px;">${resetLink}</div>
                   </div>
 
-                  <div class="divider"></div>
+                  <!-- Expiry Alert -->
+                  <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.25); border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 24px;">
+                    <p style="color: #F43F5E; font-size: 13px; font-weight: 700; margin: 0;">⏱️ This reset link expires in 15 minutes and can only be used once.</p>
+                  </div>
+
+                  <!-- Divider -->
+                  <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin-bottom: 24px;"></div>
 
                   <!-- Footer -->
-                  <div class="footer">
-                    <p>This is an automated security notification. Please do not reply directly to this email.</p>
-                    <p>© 2026 Spendly App. All rights reserved.</p>
-                  </div>
+                  <p style="color: #71717A; font-size: 12px; text-align: center; margin: 0 0 6px 0;">
+                    If you didn't request this password reset, your account remains secure.
+                  </p>
+                  <p style="color: #52525B; font-size: 11px; text-align: center; margin: 0;">
+                    © 2026 Spendly Inc. All rights reserved.
+                  </p>
+                  
                 </div>
               </div>
             </body>

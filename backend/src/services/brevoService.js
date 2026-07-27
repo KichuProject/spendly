@@ -96,45 +96,48 @@ const sendOTPEmail = async (recipientEmail, otp, userName = 'User') => {
     }
 
     const emailContent = `
+      <!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243E 100%); min-height: 100vh;">
-          <div style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
-            <!-- Glass Card Container -->
-            <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; padding: 40px 30px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);">
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #000000; color: #FFFFFF; min-height: 100vh;">
+          <div style="max-width: 520px; margin: 40px auto; padding: 0 20px;">
+            <!-- Luxury OLED Card -->
+            <div style="background: #0A0A0E; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; padding: 44px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);">
               
-              <!-- Header -->
-              <h1 style="color: #FFFFFF; text-align: center; margin: 0 0 8px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Spend App</h1>
-              <p style="color: rgba(255, 255, 255, 0.7); text-align: center; margin: 0 0 30px 0; font-size: 14px;">Your OTP Verification Code</p>
-              
-              <!-- OTP Display -->
-              <div style="text-align: center; margin: 30px 0;">
-                <p style="color: rgba(255, 255, 255, 0.6); font-size: 14px; margin: 0 0 20px 0;">Your verification code:</p>
-                
-                <!-- OTP Box -->
-                <div style="background: rgba(124, 58, 237, 0.15); border: 2px solid rgba(124, 58, 237, 0.6); border-radius: 16px; padding: 24px 16px; text-align: center;">
-                  <p style="color: #FFFFFF; font-size: 38px; font-weight: 700; letter-spacing: 8px; margin: 0; font-family: 'Arial', sans-serif; line-height: 1; white-space: nowrap;">${otp}</p>
-                </div>
+              <!-- Brand Header -->
+              <div style="text-align: center; margin-bottom: 28px;">
+                <div style="display: inline-block; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #059669 0%, #0EA5E9 50%, #6366F1 100%); line-height: 56px; font-size: 26px; color: #FFFFFF; box-shadow: 0 0 30px rgba(14, 165, 233, 0.4);">⚡</div>
+                <h1 style="color: #FFFFFF; margin: 14px 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Spendly</h1>
+                <span style="font-size: 11px; font-weight: 700; background: linear-gradient(135deg, #059669 0%, #0EA5E9 100%); color: #FFFFFF; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;">v3.0.0 Security Verification</span>
               </div>
               
-              <!-- Expiry Info -->
-              <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px; text-align: center; margin: 25px 0;">
-                <p style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin: 0;">⏱️ This code expires in <strong style="color: #FFFFFF;">5 minutes</strong></p>
-                <p style="color: rgba(255, 255, 255, 0.4); font-size: 12px; margin: 8px 0 0 0;">Don't share this code with anyone</p>
+              <p style="color: #A1A1AA; font-size: 14px; text-align: center; line-height: 1.5; margin: 0 0 28px 0;">
+                Hi <strong style="color: #FFFFFF;">${userName}</strong>, here is your 6-digit verification code to complete your login or registration:
+              </p>
+              
+              <!-- OTP Box -->
+              <div style="background: linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(14, 165, 233, 0.18) 50%, rgba(99, 102, 241, 0.12) 100%); border: 1.5px solid rgba(14, 165, 233, 0.4); border-radius: 20px; padding: 26px 16px; text-align: center; margin-bottom: 24px;">
+                <div style="color: #A1A1AA; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">Your One-Time Passcode</div>
+                <div style="color: #FFFFFF; font-size: 42px; font-weight: 800; letter-spacing: 10px; font-family: 'Courier New', monospace; line-height: 1;">${otp}</div>
+              </div>
+              
+              <!-- Expiry Alert Pill -->
+              <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 28px;">
+                <p style="color: #A1A1AA; font-size: 13px; margin: 0;">⏱️ Code expires in <strong style="color: #10B981;">5 minutes</strong>. Never share this code with anyone.</p>
               </div>
               
               <!-- Divider -->
-              <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 30px 0;"></div>
+              <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin-bottom: 24px;"></div>
               
               <!-- Footer -->
-              <p style="color: rgba(255, 255, 255, 0.4); font-size: 12px; text-align: center; margin: 0 0 12px 0;">
-                If you didn't request this code, please ignore this email or contact support.
+              <p style="color: #71717A; font-size: 12px; text-align: center; margin: 0 0 8px 0; line-height: 1.5;">
+                If you didn't request this code, you can safely ignore this email.
               </p>
-              <p style="color: rgba(255, 255, 255, 0.3); font-size: 11px; text-align: center; margin: 0;">
-                © 2026 Spend App. All rights reserved.
+              <p style="color: #52525B; font-size: 11px; text-align: center; margin: 0;">
+                © 2026 Spendly Inc. End-to-End Encrypted Security.
               </p>
               
             </div>
@@ -156,7 +159,7 @@ const sendOTPEmail = async (recipientEmail, otp, userName = 'User') => {
             name: userName,
           },
         ],
-        subject: `Your Spend App OTP: ${otp}`,
+        subject: `Your Spendly Security Code: ${otp}`,
         htmlContent: emailContent,
       },
       {
@@ -188,66 +191,72 @@ const sendOTPEmail = async (recipientEmail, otp, userName = 'User') => {
 const sendWelcomeEmail = async (userEmail, userName) => {
   try {
     const emailContent = `
+      <!DOCTYPE html>
       <html>
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243E 100%); min-height: 100vh;">
-          <div style="max-width: 500px; margin: 40px auto; padding: 0 20px;">
-            <!-- Glass Card Container -->
-            <div style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; padding: 40px 30px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);">
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #000000; color: #FFFFFF; min-height: 100vh;">
+          <div style="max-width: 520px; margin: 40px auto; padding: 0 20px;">
+            <!-- Luxury OLED Card -->
+            <div style="background: #0A0A0E; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; padding: 44px 32px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);">
               
               <!-- Header -->
-              <h1 style="color: #FFFFFF; text-align: center; margin: 0 0 8px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Welcome! 🎉</h1>
-              <p style="color: rgba(255, 255, 255, 0.7); text-align: center; margin: 0 0 30px 0; font-size: 14px;">To Spend App</p>
+              <div style="text-align: center; margin-bottom: 28px;">
+                <div style="display: inline-block; width: 60px; height: 60px; border-radius: 20px; background: linear-gradient(135deg, #059669 0%, #0EA5E9 50%, #6366F1 100%); line-height: 60px; font-size: 28px; color: #FFFFFF; box-shadow: 0 0 35px rgba(14, 165, 233, 0.4);">🎉</div>
+                <h1 style="color: #FFFFFF; margin: 16px 0 4px 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Welcome to Spendly!</h1>
+                <p style="color: #A1A1AA; font-size: 14px; margin: 0;">Next-Gen Voice Personal Finance & Analytics</p>
+              </div>
               
-              <!-- Main Content -->
-              <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px; margin: 0 0 20px 0;">Hi <strong style="color: #FFFFFF;">${userName}</strong>,</p>
-              
-              <p style="color: rgba(255, 255, 255, 0.8); font-size: 15px; line-height: 1.6; margin: 0 0 25px 0;">
-                Welcome to Spend App — Your personal expense tracking companion! Track every rupee, analyze your spending patterns, and manage your finances effortlessly.
+              <p style="color: #E4E4E7; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                Hi <strong style="color: #FFFFFF;">${userName}</strong>, welcome aboard! Spendly helps you master your money with natural voice entry, group bill splitting, and visual analytics.
               </p>
               
-              <!-- Features Grid -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 30px 0;">
-                <div style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px; text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
-                  <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0; font-weight: 600;">Track Expenses</p>
-                  <p style="color: rgba(255, 255, 255, 0.5); font-size: 11px; margin: 4px 0 0 0;">Daily & weekly</p>
+              <!-- 4 Feature Cards Grid -->
+              <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 10px; margin-bottom: 28px;">
+                <div style="display: table-row;">
+                  <div style="display: table-cell; width: 50%; background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 16px; vertical-align: top;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">🎙️</div>
+                    <div style="color: #FFFFFF; font-size: 13px; font-weight: 700; margin-bottom: 4px;">Voice Entry</div>
+                    <div style="color: #71717A; font-size: 11px; line-height: 1.4;">English & Tamil speech parsing</div>
+                  </div>
+                  <div style="display: table-cell; width: 50%; background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 16px; vertical-align: top;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">👥</div>
+                    <div style="color: #FFFFFF; font-size: 13px; font-weight: 700; margin-bottom: 4px;">Group Splits</div>
+                    <div style="color: #71717A; font-size: 11px; line-height: 1.4;">Split bills & settle via UPI</div>
+                  </div>
                 </div>
-                <div style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px; text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 8px;">👥</div>
-                  <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0; font-weight: 600;">Split Bills</p>
-                  <p style="color: rgba(255, 255, 255, 0.5); font-size: 11px; margin: 4px 0 0 0;">With friends</p>
-                </div>
-                <div style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px; text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
-                  <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0; font-weight: 600;">Analytics</p>
-                  <p style="color: rgba(255, 255, 255, 0.5); font-size: 11px; margin: 4px 0 0 0;">Insights & trends</p>
-                </div>
-                <div style="background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.4); border-radius: 12px; padding: 16px; text-align: center;">
-                  <div style="font-size: 24px; margin-bottom: 8px;">🔔</div>
-                  <p style="color: rgba(255, 255, 255, 0.8); font-size: 12px; margin: 0; font-weight: 600;">Reminders</p>
-                  <p style="color: rgba(255, 255, 255, 0.5); font-size: 11px; margin: 4px 0 0 0;">Never forget</p>
+                <div style="display: table-row;">
+                  <div style="display: table-cell; width: 50%; background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 16px; vertical-align: top;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">📊</div>
+                    <div style="color: #FFFFFF; font-size: 13px; font-weight: 700; margin-bottom: 4px;">Visual Insights</div>
+                    <div style="color: #71717A; font-size: 11px; line-height: 1.4;">Monthly spending breakdown</div>
+                  </div>
+                  <div style="display: table-cell; width: 50%; background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 16px; vertical-align: top;">
+                    <div style="font-size: 22px; margin-bottom: 6px;">⚡</div>
+                    <div style="color: #FFFFFF; font-size: 13px; font-weight: 700; margin-bottom: 4px;">Daily Streaks</div>
+                    <div style="color: #71717A; font-size: 11px; line-height: 1.4;">Stay consistent & track progress</div>
+                  </div>
                 </div>
               </div>
               
-              <!-- CTA Section -->
-              <div style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(79, 70, 229, 0.2) 100%); border: 1px solid rgba(124, 58, 237, 0.5); border-radius: 12px; padding: 20px; text-align: center; margin: 30px 0;">
-                <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; margin: 0; font-weight: 600;">You're all set! 🚀</p>
-                <p style="color: rgba(255, 255, 255, 0.6); font-size: 13px; margin: 8px 0 0 0;">Start tracking your expenses now</p>
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 28px;">
+                <a href="http://localhost:5000/app.html" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #0EA5E9 50%, #6366F1 100%); color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 16px; font-weight: 700; font-size: 14px; box-shadow: 0 0 30px rgba(14, 165, 233, 0.35);">
+                  Launch Spendly Application →
+                </a>
               </div>
               
               <!-- Divider -->
-              <div style="height: 1px; background: rgba(255, 255, 255, 0.1); margin: 30px 0;"></div>
+              <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin-bottom: 24px;"></div>
               
               <!-- Footer -->
-              <p style="color: rgba(255, 255, 255, 0.4); font-size: 12px; text-align: center; margin: 0 0 12px 0;">
-                Need help? Check out our support or documentation.
+              <p style="color: #71717A; font-size: 12px; text-align: center; margin: 0 0 6px 0;">
+                Have questions or feedback? Reply directly to this email.
               </p>
-              <p style="color: rgba(255, 255, 255, 0.3); font-size: 11px; text-align: center; margin: 0;">
-                © 2026 Spend App. All rights reserved.
+              <p style="color: #52525B; font-size: 11px; text-align: center; margin: 0;">
+                © 2026 Spendly Inc. All rights reserved.
               </p>
               
             </div>
@@ -269,7 +278,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
             name: userName,
           },
         ],
-        subject: `Welcome to Spend App, ${userName}!`,
+        subject: `Welcome to Spendly, ${userName}! 🎉`,
         htmlContent: emailContent,
       },
       {
@@ -297,9 +306,6 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 
 /**
  * Send Brevo keep-alive email
- * Called monthly to keep Brevo API active
- * Prevents Brevo from deactivating account after ~3 months of no usage
- * @returns {object} - Success status
  */
 const sendBrevoKeepAliveEmail = async () => {
   try {
@@ -315,60 +321,15 @@ const sendBrevoKeepAliveEmail = async () => {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body {
-              margin: 0;
-              padding: 0;
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              background: linear-gradient(135deg, #0F0C29 0%, #302B63 50%, #24243E 100%);
-              min-height: 100vh;
-            }
-            .container {
-              max-width: 600px;
-              margin: 40px auto;
-              padding: 0 20px;
-            }
-            .card {
-              background: rgba(255, 255, 255, 0.1);
-              backdrop-filter: blur(20px);
-              -webkit-backdrop-filter: blur(20px);
-              border: 1px solid rgba(255, 255, 255, 0.2);
-              border-radius: 24px;
-              padding: 40px 30px;
-              box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            }
-            h1 {
-              color: #FFFFFF;
-              text-align: center;
-              margin: 0 0 20px 0;
-              font-size: 28px;
-              font-weight: 700;
-            }
-            p {
-              color: rgba(255, 255, 255, 0.8);
-              font-size: 15px;
-              line-height: 1.6;
-              margin: 0 0 15px 0;
-            }
-            .timestamp {
-              color: rgba(255, 255, 255, 0.5);
-              font-size: 12px;
-              text-align: center;
-              margin-top: 30px;
-              padding-top: 20px;
-              border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-          </style>
         </head>
-        <body>
-          <div class="container">
-            <div class="card">
-              <h1>✅ Brevo Keep-Alive Email</h1>
-              <p>This is an automated monthly email to keep the Brevo API active for the Spend App backend.</p>
-              <p>This email ensures that the email service continues to function properly and prevents account deactivation due to inactivity.</p>
-              <p><strong>Next scheduled keep-alive:</strong> 30 days from now</p>
-              <div class="timestamp">
-                Generated on: ${new Date().toISOString()}
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #000000; color: #FFFFFF; min-height: 100vh;">
+          <div style="max-width: 520px; margin: 40px auto; padding: 0 20px;">
+            <div style="background: #0A0A0E; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 36px 28px; text-align: center;">
+              <div style="display: inline-block; width: 48px; height: 48px; border-radius: 14px; background: rgba(16, 185, 129, 0.15); color: #10B981; line-height: 48px; font-size: 22px; margin-bottom: 16px;">✅</div>
+              <h1 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0 0 10px 0;">Spendly Backend Keep-Alive</h1>
+              <p style="color: #A1A1AA; font-size: 13px; line-height: 1.5; margin-bottom: 20px;">Automated monthly diagnostic check ensuring Brevo API status remains active for production notifications.</p>
+              <div style="background: #121218; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; font-family: monospace; font-size: 11px; color: #10B981;">
+                Status: Active • Timestamp: ${new Date().toISOString()}
               </div>
             </div>
           </div>

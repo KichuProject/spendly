@@ -68,7 +68,7 @@ export default function SecondaryButton({
         ) : (
           <>
             {icon && icon}
-            <Text style={[styles.text, { color: textColor, fontSize: sizeStyle.fontSize || 15, fontWeight: sizeStyle.fontWeight || '700' }, { paddingTop: 0, paddingBottom: 3 }, icon && { marginLeft: 8 }, textStyle]}>
+            <Text style={[styles.text, { color: textColor, fontSize: sizeStyle.fontSize || 15, fontWeight: sizeStyle.fontWeight || '700' }, { includeFontPadding: false }, icon && { marginLeft: 8 }, textStyle]}>
               {title}
             </Text>
 

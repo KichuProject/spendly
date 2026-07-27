@@ -572,5 +572,6 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: '700',
+    includeFontPadding: false,
   },
 });

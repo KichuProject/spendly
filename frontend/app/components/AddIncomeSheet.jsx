@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform, Animated, Keyboard } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import ThemedText from './common/ThemedText';
 import ThemedInput from './common/ThemedInput';
@@ -87,6 +87,25 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
   const [showCustomSourceInput, setShowCustomSourceInput] = useState(false);
 
   const emojiScale = useRef(new Animated.Value(1)).current;
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
     emojiScale.setValue(0.5);
@@ -202,7 +221,7 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <KeyboardAvoidingView
-        style={styles.overlay}
+        style={[styles.overlay, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.dismissArea} onPress={onClose} />
@@ -461,11 +480,11 @@ export default function AddIncomeSheet({ visible, onClose, onSave, editIncome })
       <DateRangePicker
         visible={showDatePicker}
         onClose={() => setShowDatePicker(false)}
-        onConfirm={(start) => {
-          setDate(start);
+        onSelect={(res) => {
+          if (res.start) setDate(res.start);
           setShowDatePicker(false);
         }}
-        singleMode
+        singleDate
       />
     </Modal>
   );

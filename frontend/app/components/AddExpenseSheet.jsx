@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Modal, ScrollView, TextInput, KeyboardAvoidingView, Platform, Animated, Keyboard } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThemedText from './common/ThemedText';
 import ThemedInput from './common/ThemedInput';
@@ -32,10 +32,29 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
   const [friendSearch, setFriendSearch] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [direction, setDirection] = useState('theyOwe');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const categoryInfo = getCategoryInfo(reason);
   const emoji = categoryInfo.emoji;
   const keywords = getCategoryKeywords(categoryInfo.name);
   const emojiScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
     emojiScale.setValue(0.5);
@@ -192,8 +211,8 @@ export default function AddExpenseSheet({ visible, onClose, onSave, preselectedF
   return (
     <Modal transparent visible={visible} animationType="slide">
       <KeyboardAvoidingView 
-        style={styles.backdrop} 
-        behavior="padding"
+        style={[styles.backdrop, Platform.OS === 'android' && { paddingBottom: keyboardHeight }]} 
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Pressable style={styles.dimArea} onPress={onClose} />
         <View style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}>
